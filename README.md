@@ -4,9 +4,9 @@
 ## Index
 * [Chapter 2: Creating and Destroying Objects](#chapter-2-creating-and-destroying-objects)
     * [Item 1: Consider static factory methods instead of constructors](#item-1-consider-static-factory-methods-instead-of-constructors)
-    * [Item 2: Consider a builder when faced with many constructor parameters](#[item-2-consider-a-builder-when-faced-with-many-constructor-parameters)
+    * [Item 2: Consider a builder when faced with many constructor parameters](#item-2-consider-a-builder-when-faced-with-many-constructor-parameters)
     * [Item 3: Enforce the singleton property with a private constructor or an enum type](#item-3-enforce-the-singleton-property-with-a-private-constructor-or-an-enum-type)
-    * [Item 4: Enforce noninstantiability with a private consturctor](#item-4-enforce-noninstantiability-with-a-private-consturctor)
+    * [Item 4: Enforce noninstantiability with a private constructor](#item-4-enforce-noninstantiability-with-a-private-constructor)
     * [Item 5: Prefer dependency injection to hardwiring resources](#item-5-prefer-dependency-injection-to-hardwiring-resources)
     * [Item 6: Avoid creating unnecessary objects](#item-6-avoid-creating-unnecessary-objects)
     * [Item 7: Eliminate obsolete object references](#item-7-eliminate-obsolete-object-references)
@@ -33,7 +33,7 @@
 * [Generics](#chapter5)
     * [Item 26: Don’t use raw types](#item26)
 
-## Creating and Destroying Objects
+## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
 
 It is preferred to use static factory instead of constructor for the following
