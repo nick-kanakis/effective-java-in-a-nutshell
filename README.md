@@ -31,7 +31,8 @@
     * [Item 24: Favor static member classes over nonstatic](#item24)
     * [Item 25: Limit source files to a single top-level class](#item25)
 * [Generics](#chapter5)
-    * [Item 26: Don’t use raw types](#item26)
+    * [Item 26: Don’t use raw types](#item-26-dont-use-raw-types)
+    * [Item 27: Eliminate unchecked warnings](#item-27-eliminate-unchecked-warnings)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -731,3 +732,82 @@ are independent of the order in which the source files are passed to the compile
 ## Generics
 
 ### Item 26: Don’t use raw types
+
+Raw type of List\<E> is List. Raw types behave as if all of
+the generic type information were erased from the type declaration.
+They exist primarily for compatibility with pre-generics code.
+
+With generics you can control what instance can be inserted into your datastructure.
+If you use raw types, you lose all the safety and expressiveness benefits of generics
+
+What is the difference between the raw type List and the parameterized type List\<Object>?
+
+While you can pass a List\<String> to a parameter of type List, you can’t pass it to a parameter
+of type List\<Object>. List\<Object> is perfectly acceptable.
+
+If you want to use a generic type but you don’t know or care what the actual type parameter is,
+you can use a question mark instead.
+
+eg: Set<?>
+
+It is the most general parameterized Set type, capable of holding any set.
+
+There are two facts about Set<?>:
+
+- Since the question mark ? stands for any type. Set<?> is capable of holding any type of elements.
+- Because we don't know the type of ?, we can't put any element into Set<?>
+
+What is the difference between the unbounded wildcard type Set<?> and the
+raw type Set?
+
+ArrayList with raw type is not type safe but ArrayList<?> with the unbounded wildcard is type safe.
+
+You can add objects of any type into raw ArrayList but you cannot do
+that with a generic ArrayList with unbounded wildcard i.e. ArrayList.
+
+```
+//Legal Code
+public static void main(String[] args) {
+	HashSet<Integer> s1 = new HashSet<Integer>(Arrays.asList(1, 2, 3));
+	printSet(s1);
+
+	HashSet<String> s2 = new HashSet<String>(Arrays.asList("a", "b", "c"));
+	printSet(s2);
+}
+
+public static void printSet(Set<?> s) {
+	for (Object o : s) {
+		System.out.println(o);
+	}
+}
+
+//Illegal Code
+public static void printSet2(Set<?> s) {
+	s.add(10);//this line is illegal
+	for (Object o : s) {
+		System.out.println(o);
+	}
+}
+
+```
+
+```printSet2``` method whould be legal if the argument was ```Set s```
+However, this will easily corrupt the invariant of collection.
+
+Generally in we cannot assume anything about the unbounded wild card, so you
+cannot insert anything, you cannot even instantiate one:
+
+```
+//Illegal Code
+Set<?> set = new HashSet<?>();
+```
+
+### Item 27: Eliminate unchecked warnings
+
+Eliminate every unchecked warning that you can.
+
+If you can’t eliminate a warning, but you can prove that the code that
+provoked the warning is typesafe, then (and only then) suppress the
+warning with an @SuppressWarnings("unchecked") annotation. And always use the
+SuppressWarnings annotation on the smallest scope possible. Do not forget to
+comment asying why it is safe to do so.
