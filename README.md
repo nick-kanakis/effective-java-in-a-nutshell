@@ -1265,7 +1265,29 @@ declarations from interfaces (default methods) as well as classes.
 
 ### Item 41: Use marker interfaces to define types
 
+Do not use marker annotations for marker interfaces.
 
+Marker interface is an interface that contains no method declarations but
+merely designates (or “marks”) a class that implements the interface as having
+some property. For example, consider the Serializable interface.
 
+Marker interfaces define a type that is implemented by instances of the marked class; marker
+annotations do not
 
+If you define it as a marker interface, you can have it extend
+the sole interface to which it is applicable, guaranteeing that all marked types are
+also subtypes of the sole interface to which it is applicable. This cannot be done
+in a marker annotation.
 
+when should you use a marker annotation and when should you use a
+marker interface?
+
+Clearly you must use an annotation if the marker applies to
+any program element other than a class or interface, because only classes and
+interfaces can be made to implement or extend an interface
+
+If you want to define a type that does not have any new methods associated with it,
+a marker interface is the way to go. If you want to mark program elements other
+than classes and interfaces or to fit the marker into a framework that already
+makes heavy use of annotation types, then a marker annotation is the correct
+choice.
