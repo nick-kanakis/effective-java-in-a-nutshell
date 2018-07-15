@@ -1,6 +1,5 @@
 # Effective Java in a nutshell (3rd edition)
 
-
 ## Index
 * [Chapter 2: Creating and Destroying Objects](#chapter-2-creating-and-destroying-objects)
     * [Item 1: Consider static factory methods instead of constructors](#item-1-consider-static-factory-methods-instead-of-constructors)
@@ -12,7 +11,7 @@
     * [Item 7: Eliminate obsolete object references](#item-7-eliminate-obsolete-object-references)
     * [Item 8: Avoid finalizers and cleaners](#item-8-avoid-finalizers-and-cleaners)
     * [Item 9: Prefer try-with-resources to try-finally](#item-9-prefer-try-with-resources-to-try-finally)
-* [Methods Common to All Objects](#chapter3)
+* [Chapter 3: Methods common to all objects](#chapter-3-methods-common-to-all-objects)
     * [Item 10: Obey the general contract when overriding equals](#item10)
     * [Item 11: Always override hashCode when you override equals](#item11)
     * [Item 12: Always override toString](#item12)
@@ -30,9 +29,24 @@
     * [Item 23: Prefer class hierarchies to tagged classes](#item23)
     * [Item 24: Favor static member classes over nonstatic](#item24)
     * [Item 25: Limit source files to a single top-level class](#item25)
-* [Generics](#chapter5)
+* [Chapter 5: Generics](#chapter-5-generics)
     * [Item 26: Don’t use raw types](#item-26-dont-use-raw-types)
     * [Item 27: Eliminate unchecked warnings](#item-27-eliminate-unchecked-warnings)
+    * [Item 28: Prefer lists to arrays](#item-28-prefer-lists-to-arrays)
+    * [Item 29: Favor generic types](#item-29-favor-generic-types)
+    * [Item 30: Favor generic methods](#item-30-favor-generic-methods)
+    * [Item 31: Use bounded wildcards to increase API flexibility](#item-31-use-bounded-wildcards-to-increase-api-flexibility)
+    * [Item 32: Combine generics and varargs judiciously](#item-32-combine-generics-and-varargs-judiciously)
+    * [Item 33: Consider typesafe heterogeneous containers](#item-32-consider-typesafe-heterogeneous-containers)
+* [Chapter 6: Enums and Annotations](#chapter-6-enums-and-annotations)
+    * [Item 34: Use enums instead of int constants](#item-34-use-enums-instead-of-int-constants)
+    * [Item 35: Use instance fields instead of ordinals](#item-35-use-instance-fields-instead-of-ordinals)
+    * [Item 36: Use EnumSet instead of bit fields](#item-36-use-enumset-instead-of-bit-fields)
+    * [Item 37: Use EnumMap instead of ordinal indexing](#item-36-use-enummap-instead-of-ordinal-indexing)
+    * [Item 38: Emulate extensible enums with interfaces](#item-38-emulate-extensible-enums-with-interfaces)
+    * [Item 39: Prefer annotations to naming patterns](#item-39-prefer-annotations-to-naming-patterns)
+    * [Item 40: Consistently use the Override annotation](#item-40-consinstetly-use-the-override-annotation)
+    * [Item 41: Use marker interfaces to define types](#item-41-use-marker-interfaces-to-define-types)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -154,7 +168,7 @@ Advantages:
 3) If an error is thrown by the try block and the finally block only the
 exception in the finally block will be written.
 
-## Methods Common to All Objects
+## Chapter 3: Methods common to all objects
 
 ### Item 10: Obey the general contract when overriding equals
 
@@ -811,3 +825,447 @@ provoked the warning is typesafe, then (and only then) suppress the
 warning with an @SuppressWarnings("unchecked") annotation. And always use the
 SuppressWarnings annotation on the smallest scope possible. Do not forget to
 comment asying why it is safe to do so.
+
+### Item 28: Prefer lists to arrays
+
+If Sub is a subtype of Super, then the array type Sub\[] is a subtype of the array type Super\[].
+This is not the case in Generics, for any two distinct types Type1 and
+Type2, List\<Type1> is neither a subtype nor a supertype of List\<Type2>.
+
+Why this is a preferable?
+
+Because you can find errors during compiling and not during run-time.
+
+```
+// Fails at runtime!
+Object[] objectArray = new Long[1];
+objectArray[0] = "I don't fit in"; // Throws ArrayStoreException
+
+
+// Won't compile!
+List<Object> ol = new ArrayList<Long>(); // Incompatible types
+ol.add("I don't fit in");
+```
+
+It is illegal to create an array of a generic type (because generic isn't typesafe), a
+parameterized type, or a type parameter. Therefore, none of these array creation
+expressions are legal: new List\<E>\[], new List\<String>\[], new
+E\[]
+
+Generally arrays provide runtime type safety but not compile-time type safety, and vice
+versa for generics avoid combining generics and arrays!
+
+### Item 29: Favor generic types
+
+Generic types are safer and easier to use than types that require
+casts in client code. When you design new types, make sure that they can be
+used without such casts
+
+### Item 30: Favor generic methods
+
+The type parameter list, which declares the type parameters, goes
+between a method’s modifiers and its return type
+eg:
+
+```
+// Generic method
+public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
+    Set<E> result = new HashSet<>(s1);
+    result.addAll(s2);
+    return result;
+}
+
+```
+
+Generic methods, like generic types, are safer and easier to use
+than methods requiring their clients to put explicit casts on input parameters and
+return values.
+
+### Item 31: Use bounded wildcards to increase API flexibility
+
+As we said in item 28
+
+Despite the fact that String is a subtype of Object List\<String> is not a subtype of
+List\<Object>, so you cannot add a String to a list\<Object>, and this is good. But sometimes you
+may need to have that flexibility.
+
+For this we can use bounded wildcards. Eg:
+
+```
+Iterable<? extends E>
+```
+
+This means that Iterable can be any time that is subtype of E, or E itshelf.
+
+For maximum flexibility, use wildcard types on input parameters that represent producers or consumers.
+
+**PECS stands for producer-extends, consumer-super.**
+- if a parameterized type represents a T producer, use **<?extends T>**
+- if it represents a T consumer, use **<? super T>**.
+
+But keep in mind you should never use bounded wildcard types as return types.
+This force the client to use wildcard types too.
+
+- Use Comparable<? super T> in preference to Comparable<T>.
+- Use Comparator<? super T> in preference to Comparator<T>
+
+eg:
+
+```
+public static <T extends Comparable<? super T>> T max(List<? extends T> list)
+```
+
+### Item 32: Combine generics and varargs judiciously
+
+When you invoke a varargs method, an array of Object is created to hold the varargs parameters.
+Remember that generics and arrays do not play well together.
+
+It is unsafe most of the times to store a value in a generic varargs array parameter.
+
+When it is safe to use generic with arrays?
+
+1) If the method doesn’t store anything into the array.
+
+2) If the method doesn’t allow a reference to the array to escape.
+
+
+If the method is 100% safe you can use the SafeVarargs (@SafeVarargs) annotation that constitutes
+a promise by the author of a method that it is typesafe
+
+As an alternative you can use a list of lists as arguments :
+
+```
+static <T> List<T> flatten(List<List<? extends T>> lists) {
+    List<T> result = new ArrayList<>();
+    for (List<? extends T> list : lists)
+        result.addAll(list);
+    return result;
+}
+```
+
+### Item 33: Consider typesafe heterogeneous containers
+???
+
+You can add elements of different type by parameterizing the key instead of the container.
+Then present the parameterized key to the container to insert or retrieve a value.
+
+eg: The Class object for the type will play the part of the parameterized key.
+The reason this works is that class Class is generic. The type of a class literal
+is not simply Class, but Class\<T>. For example, String.class is of type
+Class\<String>, and Integer.class is of type Class\<Integer>.
+
+
+```
+// Typesafe heterogeneous container pattern - implementation
+public class Favorites {
+    private Map<Class<?>, Object> favorites = new HashMap<>();
+
+    public <T> void putFavorite(Class<T> type, T instance) {
+        favorites.put(Objects.requireNonNull(type), instance);
+    }
+
+    public <T> T getFavorite(Class<T> type) {
+        return type.cast(favorites.get(type));
+    }
+}
+```
+
+The cast method is the dynamic analogue of Java’s cast operator. It simply
+checks that its argument is an instance of the type represented by the Class
+object. If so, it returns the argument; otherwise it throws a
+ClassCastException.
+
+The normal use of generics, exemplified by the collections APIs,
+restricts you to a fixed number of type parameters per container. You can get
+around this restriction by placing the type parameter on the key rather than the
+container. You can use Class objects as keys for such typesafe heterogeneous
+containers. A Class object used in this fashion is called a type token. You can
+also use a custom key type. For example, you could have a DatabaseRow type
+representing a database row (the container), and a generic type Column<T> as
+its key.
+
+## Chapter 6: Enums and Annotations
+
+### Item 34: Use enums instead of int constants
+
+Why to avoid int constants?
+1) Their is no type safety, the compiler won’t complain if you pass an apple to a method that
+expects an orange
+2) There is no easy way to translate int enum constants into printable strings. If
+you print such a constant or display it from a debugger, all you see is a number.
+3) You have to use prefixes to identify different things like: ELEMENT_MERCURY and PLANET_MERCURY
+
+solution:
+```
+public enum Apple { FUJI, PIPPIN, GRANNY_SMITH }
+public enum Orange { NAVEL, TEMPLE, BLOOD }
+```
+
+The basic idea behind Java’s enum types is simple: they are classes that export
+one instance for each enumeration constant via a public static final field. Enum
+types are effectively final, by virtue of having no accessible constructors.
+They are a generalization of singletons, which are essentially single-element enums.
+
+Enums provide compile-time type safety. If you declare a parameter to be of
+type Apple, you are guaranteed that any non-null object reference passed to the
+parameter is one of the three valid Apple values.
+
+To associate data with enum constants, declare instance fields and write a constructor that takes
+the data and stores it in the fields.
+
+eg:
+```
+public enum Planet {
+    MERCURY(3.302e+23, 2.439e6),
+    VENUS (4.869e+24, 6.052e6),
+    EARTH (5.975e+24, 6.378e6),
+    MARS (6.419e+23, 3.393e6),
+    JUPITER(1.899e+27, 7.149e7),
+    SATURN (5.685e+26, 6.027e7),
+    URANUS (8.683e+25, 2.556e7),
+    NEPTUNE(1.024e+26, 2.477e7);
+
+    private final double mass; // In kilograms
+    private final double radius; // In meters
+    private final double surfaceGravity; // In m / s^2
+
+    // Universal gravitational constant in m^3 / kg s^2
+    private static final double G = 6.67300E-11;
+
+    // Constructor
+    Planet(double mass, double radius) {
+        this.mass = mass;
+        this.radius = radius;
+        surfaceGravity = G * mass / (radius * radius);
+    }
+
+    public double mass() { return mass; }
+
+    public double radius() { return radius; }
+
+    public double surfaceGravity() { return surfaceGravity; }
+
+    public double surfaceWeight(double mass) {
+        return mass * surfaceGravity; // F = ma
+    }
+}
+```
+
+**SOS: Enums are by their nature immutable, so all fields should be final.**
+
+How to add constant-specific behavior?
+
+ 1) Create an abstract method in the enum
+ 2) In each constant override the abstract method and create a concrete
+ implementation
+
+ ```
+public enum Operation {
+    PLUS {public double apply(double x, double y){return x + y;}},
+    MINUS {public double apply(double x, double y){return x - y;}},
+    TIMES {public double apply(double x, double y){return x * y;}},
+    DIVIDE{public double apply(double x, double y){return x / y;}};
+
+    public abstract double apply(double x, double y);
+}
+ ```
+
+ **Enum types have an automatically generated valueOf(String) method
+   that translates a constant’s name into the constant itself.**
+
+```
+Operation op = Operation.valueOf("PLUS");
+```
+
+### Item 35: Use instance fields instead of ordinals
+
+All enums have an ordinal method, which returns the numerical position of each enum
+constant in its type.
+
+
+```
+public enum Ensemble {
+    SOLO, DUET, TRIO, QUARTET, QUINTET,
+    SEXTET, SEPTET, OCTET, NONET, DECTET;
+
+    public int numberOfMusicians() { return ordinal() + 1; }
+}
+```
+
+This is very fragile a simple reordering or an addition/deletion of a constant
+will break any implementation relying on ordinal() method.
+
+Never derive a value associated with an enum from its ordinal; store it in an instance field
+instead:
+
+```
+public enum Ensemble {
+    SOLO(1), DUET(2), TRIO(3), QUARTET(4), QUINTET(5),
+    SEXTET(6), SEPTET(7), OCTET(8), DOUBLE_QUARTET(8),
+    NONET(9), DECTET(10), TRIPLE_QUARTET(12);
+
+    private final int numberOfMusicians;
+    Ensemble(int size) { this.numberOfMusicians = size; }
+
+    public int numberOfMusicians() { return numberOfMusicians; }
+}
+```
+
+
+### Item 36: Use EnumSet instead of bit fields
+
+Just because an enumerated type will be used in sets, there is
+no reason to represent it with bit fields. The EnumSet class combines the
+conciseness and performance of bit fields with all the many advantages of enum types
+
+EnumSet is a a concrete implementation of Set interface that is used to combine
+one or more Enum constants
+
+```
+Set<Style> styles = EnumSet.of(Style.BOLD, Style.ITALIC)
+```
+
+### Item 37: Use EnumMap instead of ordinal indexing
+
+There is a very fast Map implementation designed for use with
+enum keys.
+
+```
+Map<Plant.LifeCycle, Set<Plant>> plantsByLifeCycle = new EnumMap<>(Plant.LifeCycle.class);
+```
+In the parenthesis you put the key class.
+
+You can also do mor complex nested maps:
+```
+public enum Phase {
+    SOLID, LIQUID, GAS;
+    public enum Transition {
+        MELT(SOLID, LIQUID), FREEZE(LIQUID, SOLID),
+        BOIL(LIQUID, GAS), CONDENSE(GAS, LIQUID),
+        SUBLIME(SOLID, GAS), DEPOSIT(GAS, SOLID);
+
+        private final Phase from;
+        private final Phase to;
+        Transition(Phase from, Phase to) {
+            this.from = from;
+            this.to = to;
+        }
+```
+
+and use a EnumMap like this:
+```
+Map<Phase, Map<Phase, Transition>> = new EnumMap<>(Phase.class)
+```
+
+The above means: “map from (source) phase to map from (destination) phase to transition.”
+
+### Item 38: Emulate extensible enums with interfaces
+
+Generally you cannot (and should not) extend enums, you can emulate it by writing an interface
+to accompany a basic enum type that implements the interface.
+This allows clients to write their own enums (or other types) that implement the interface.
+Instances of these types can then be used wherever instances of the basic enum type can be used,
+assuming APIs are written in terms of the interface.
+
+```
+public interface Operation {
+    double apply(double x, double y);
+}
+
+public enum BasicOperation implements Operation {
+    PLUS("+") {
+        public double apply(double x, double y) { return x + y; }
+    },
+    MINUS("-") {
+        public double apply(double x, double y) { return x - y; }
+    },
+    TIMES("*") {
+        public double apply(double x, double y) { return x * y; }
+    },
+    DIVIDE("/") {
+        public double apply(double x, double y) { return x / y; }
+    };
+
+    private final String symbol;
+    BasicOperation(String symbol) {
+        this.symbol = symbol;
+    }
+ }
+
+public enum ExtendedOperation implements Operation {
+    EXP("^") {
+        public double apply(double x, double y) {
+            return Math.pow(x, y);
+        }
+    },
+    REMAINDER("%") {
+        public double apply(double x, double y) {
+            return x % y;
+        }
+  };
+
+    private final String symbol;
+    ExtendedOperation(String symbol) {
+        this.symbol = symbol;
+    }
+}
+
+```
+
+The extended enum do not have the functionalities of the "super" enum.
+You have to re-write the functionality or use encapsulation.
+
+### Item 39: Prefer annotations to naming patterns
+
+How to define your own annotation:
+
+```
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Test {
+}
+```
+
+- @Retention(RetentionPolicy.RUNTIME) meta-annotation indicates
+  that Test annotations should be retained at runtime.
+
+- @Target.get(ElementType.METHOD) meta-annotation indicates that the
+  Test annotation is legal only on method declarations
+
+Both @Retention & @Target are called meta-annotations
+
+What if you want to indicate that the method must throw the designated exception?
+
+```
+@Target(ElementType.METHOD)
+public @interface ExceptionTest {
+    Class<? extends Throwable> value();
+}
+```
+
+or for multiple exceptions:
+
+```
+@Target(ElementType.METHOD)
+public @interface ExceptionTest {
+    Class<? extends Throwable>[] value();
+}
+```
+
+### Item 40: Consistently use the Override annotation
+
+You should use the Override annotation on every method
+declaration that you believe to override a superclass declaration.
+This will help to identify cases you have accidentally messed up the signature
+of the method you are overriding.
+
+Also the Override annotation may be used on method declarations that override
+declarations from interfaces (default methods) as well as classes.
+
+
+### Item 41: Use marker interfaces to define types
+
+
+
+
+
