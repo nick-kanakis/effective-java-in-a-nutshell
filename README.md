@@ -47,6 +47,14 @@
     * [Item 39: Prefer annotations to naming patterns](#item-39-prefer-annotations-to-naming-patterns)
     * [Item 40: Consistently use the Override annotation](#item-40-consinstetly-use-the-override-annotation)
     * [Item 41: Use marker interfaces to define types](#item-41-use-marker-interfaces-to-define-types)
+* [Chapter 8: Methods](#chapter-8-methods)
+    * [Item 49: Check parameters for validity](#item-49-check-parameters-for-validity)
+    * [Item 50: Make defensive copies when needed](#item-50-make-defensive-copies-when-needed)
+    * [Item 51: Design method signatures carefully](#item-51-design-method-signatures-carefully)
+    * [Item 52: Use overloading judiciously](#item-52-use-overloading-judiciously)
+    * [Item 53: Use varargs judiciously](#item-53-use-varargs-judiciously)
+    * [Item 54: Return empty collections or arrays, not nulls](#item-54-return-empty-collections-or-arrays-not-nulls)
+
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -944,7 +952,6 @@ static <T> List<T> flatten(List<List<? extends T>> lists) {
 ```
 
 ### Item 33: Consider typesafe heterogeneous containers
-???
 
 You can add elements of different type by parameterizing the key instead of the container.
 Then present the parameterized key to the container to insert or retrieve a value.
@@ -981,7 +988,7 @@ around this restriction by placing the type parameter on the key rather than the
 container. You can use Class objects as keys for such typesafe heterogeneous
 containers. A Class object used in this fashion is called a type token. You can
 also use a custom key type. For example, you could have a DatabaseRow type
-representing a database row (the container), and a generic type Column<T> as
+representing a database row (the container), and a generic type Column\<T> as
 its key.
 
 ## Chapter 6: Enums and Annotations
@@ -1279,7 +1286,7 @@ the sole interface to which it is applicable, guaranteeing that all marked types
 also subtypes of the sole interface to which it is applicable. This cannot be done
 in a marker annotation.
 
-when should you use a marker annotation and when should you use a
+When should you use a marker annotation and when should you use a
 marker interface?
 
 Clearly you must use an annotation if the marker applies to
@@ -1291,3 +1298,199 @@ a marker interface is the way to go. If you want to mark program elements other
 than classes and interfaces or to fit the marker into a framework that already
 makes heavy use of annotation types, then a marker annotation is the correct
 choice.
+
+## Chapter 8: Methods
+
+### Item 49: Check parameters for validity
+
+You must always check the validity of the parameters and throw exception if
+they are incorrect. Also document which parameters are considered valid.
+
+Use @throws annotation for exceptions that the method throws (checked & unchecked)
+
+eg:
+```
+...
+// @throws ArithmeticException if m is less than or equal to 0
+...
+```
+
+**SOS:** The Objects.requireNonNull method, added in Java 7, is flexible
+and convenient, so there’s no reason to perform null checks manually
+anymore.
+
+```
+// "pointer cannot be null" as the exception detail message
+Pointer ptr = Objects.requireNonNull(ptr, "pointer cannot be null");
+```
+
+### Item 50: Make defensive copies when needed
+
+Date is obsolete and should no longer be used in new code, instead use Instant
+(or Local-DateTime or ZonedDateTime)
+
+```
+public final class Period {
+    private final Date start;
+    private final Date end;
+
+    public Period(Date start, Date end) {
+        if (start.compareTo(end) > 0)
+            throw new IllegalArgumentException(start + " after " + end);
+        this.start = start;
+        this.end = end;
+    }
+    public Date start() {
+        return start;
+    }
+
+    public Date end() {
+        return end;
+    }
+}
+
+Date start = new Date();
+Date end = new Date();
+Period p = new Period(start, end);
+end.setYear(78); // Modifies internals of p!
+```
+
+HOW????
+
+Date is mutable and can be changed after it has been passed to the Period instance.
+
+To fix it you must use defence copying:
+
+```
+// Repaired constructor - makes defensive copies of parameters
+public Period(Date start, Date end) {
+    this.start = new Date(start.getTime()); //copy of the input
+    this.end = new Date(end.getTime()); //copy of the input
+    if (this.start.compareTo(this.end) > 0)
+        throw new IllegalArgumentException(this.start + " after " + this.end);
+}
+
+// Repaired accessors - make defensive copies of internal fields
+public Date start() {
+    return new Date(start.getTime());
+}
+
+public Date end() {
+    return new Date(end.getTime());
+}
+```
+
+You should think twice before returning a reference to an internal component that is mutable,
+mutable objects can be changed by the the client and these changes will reflect on the
+creator method as well.
+
+Generally if a class has mutable components that it **gets from** or **returns to**
+its clients, the class must defensively copy these components
+
+**Java is Pass-by-value**
+
+Unfortunately, they decided to call the location of an object a "reference".
+When we pass the value of an object, we are passing the reference to it. This is confusing.
+
+```
+public static void main(String[] args) {
+    Dog aDog = new Dog("Max");
+    // we pass the object to foo
+    foo(aDog);
+    // aDog variable is still pointing to the "Max" dog when foo(...) returns
+    aDog.getName().equals("Max"); // true
+    aDog.getName().equals("Fifi"); // false
+}
+
+public static void foo(Dog d) {
+    d.getName().equals("Max"); // true
+    // change d inside of foo() to point to a new Dog instance "Fifi"
+    d = new Dog("Fifi");
+    d.getName().equals("Fifi"); // true
+}
+```
+
+In the example above aDog.getName() will still return "Max".
+The value aDog within main is not changed in the function foo with the Dog "Fifi" as the object reference is passed by value.
+If it were passed by reference, then the aDog.getName() in main would return "Fifi" after the call to foo.
+
+```
+public static void main(String[] args) {
+    Dog aDog = new Dog("Max");
+    foo(aDog);
+    // when foo(...) returns, the name of the dog has been changed to "Fifi"
+    aDog.getName().equals("Fifi"); // true
+}
+
+public static void foo(Dog d) {
+    d.getName().equals("Max"); // true
+    // this changes the name of d to be "Fifi"
+    d.setName("Fifi");
+}
+```
+
+In the above example, Fifi is the dog's name after call to foo(aDog) because the object's name was set inside of foo(...).
+Any operations that foo performs on d are such that, for all practical purposes,
+they are performed on aDog itself (except when d is changed to point to a different Dog instance like d = new Dog("Boxer")).
+
+### Item 51: Design method signatures carefully
+
+- Use <= 4 parameters per method, if you find yourself with more than 4 break up the method,
+use builder patter or use helper class (Java Beans) to group the parameters.
+
+- Favor interfaces over classes, eg: prefer Map instead of HashMap.
+
+### Item 52: Use overloading judiciously
+
+Overloading can be confusing to API clients and should be avoided.
+A safe, conservative policy is never to export two overloadings with
+the same number of parameters.
+
+You should give give methods different names instead of overloading them.
+
+Overloading is especially dangerous with autoboxing.
+
+```
+public class SetList {
+    public static void main(String[] args) {
+        Set<Integer> set = new TreeSet<>();
+        List<Integer> list = new ArrayList<>();
+
+        for (int i = -3; i < 3; i++) {
+            set.add(i);
+            list.add(i);}
+
+    for (int i = 0; i < 3; i++) {
+        set.remove(i);
+        list.remove(i);}
+
+    System.out.println(set + " " + list);
+}}
+```
+
+This will print:
+
+[-3, -2, -1] [-2, 0, 2].
+
+This is because in the list.remove(i), selects the overloading remove(int i),
+which removes the element at the specified position in the list.
+
+
+### Item 53: Use varargs judiciously
+
+The varargs facility works by first creating an array whose size is the number of arguments
+passed at the call site, then putting the argument values into the array,
+and finally passing the array to the method.
+
+- Every invocation of a varargs method causes an array allocation and initialization.
+This may cause performance issues.
+- There do no go well with generics.
+
+### Return empty collections or arrays, not nulls
+
+
+
+
+
+
+
