@@ -54,6 +54,7 @@
     * [Item 52: Use overloading judiciously](#item-52-use-overloading-judiciously)
     * [Item 53: Use varargs judiciously](#item-53-use-varargs-judiciously)
     * [Item 54: Return empty collections or arrays, not nulls](#item-54-return-empty-collections-or-arrays-not-nulls)
+    * [Item 55: Return optionals judiciously](#item-55-return-optionals-judiciously)
 
 
 ## Chapter 2: Creating and Destroying Objects
@@ -1488,9 +1489,50 @@ This may cause performance issues.
 
 ### Return empty collections or arrays, not nulls
 
+For Collections it is preferable to return empty collection instead of null
+you can use these for convenience:
 
+```
+Collections.emptyList
+Collections.emptySet
+Collections.emptyMap
+```
 
+The same advise should be used and when return an array.
 
+### Item 55: Return optionals judiciously
 
+When things go south you had 2 options: throw an exception, return null.
 
+In Java 8 you can use Optional\<T>, it represents an immutable container that
+can hold either a single non-null T reference or nothing at all
 
+To return an optional:
+```
+Optional.empty() //empty Optional
+Optional.of(value) //non empty Optional
+```
+
+Optionals are similar in spirit to checked exceptions,
+in that they force the user of an API to confront the fact that there may
+be no value returned.
+
+Container types, including collections, maps, streams, arrays, and optionals should not be
+wrapped in optionals. Rather than returning an empty
+Optional<List\<T>>, you should simply return an empty List\<T>
+
+An Optional is an object that has to be allocated and
+initialized, and reading the value out of the optional requires an extra indirection.
+This makes optionals inappropriate for use in some performance-critical
+situations.
+
+You should never return an optional of a boxed primitive type. Boxed primitive type is prohibitively
+expensive compared to returning a primitive type because the optional has two
+levels of boxing instead of zero.
+
+There are special optional for primitive types: OptionalInt, OptionalLong, and OptionalDouble.
+
+Generally, if you find yourself writing a method that can’t always return a
+value and you believe it is important that users of the method consider this
+possibility every time they call it, then you should probably return an optional.
+Finally, you should rarely use an optional in any other capacity than as a return value.
