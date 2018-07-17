@@ -17,18 +17,18 @@
     * [Item 12: Always override toString](#item-12-always-override-tostring)
     * [Item 13: Override clone judiciously](#item-13-override-clone-judiciously)
     * [Item 14: Consider implementing Comparable](#item-14-consider-implementing-comparable)
-* [Classes and Interfaces](#chapter4)
-    * [Item 15: Minimize the accessibility of classes and members](#item15)
-    * [Item 16: In public classes, use accessor methods, not public fields](#item16)
-    * [Item 17: Minimize mutability](#item17)
-    * [Item 18: Favor composition over inheritance](#item18)
-    * [Item 19: Design and document for inheritance or else prohibit it](#item19)
-    * [Item 20: Prefer interfaces to abstract classes](#item20)
-    * [Item 21: Design interfaces for posterity (future generations)](#item21)
-    * [Item 22: Use interfaces only to define types](#item22)
-    * [Item 23: Prefer class hierarchies to tagged classes](#item23)
-    * [Item 24: Favor static member classes over nonstatic](#item24)
-    * [Item 25: Limit source files to a single top-level class](#item25)
+* [Chapter 4: Classes and Interfaces](#chapter-4-classes-and-interfaces)
+    * [Item 15: Minimize the accessibility of classes and members](#item-15-minimize-the-accessibility-of-classes-and-members)
+    * [Item 16: In public classes, use accessor methods, not public fields](#item-16-in-public-classes-use-accessor-methods-not-public-fields)
+    * [Item 17: Minimize mutability](#item-17-minimize-mutability)
+    * [Item 18: Favor composition over inheritance](#item-18-favor-composition-over-inheritance)
+    * [Item 19: Design and document for inheritance or else prohibit it](#item-19-design-and-document-for-inheritance-or-else-prohibit-it)
+    * [Item 20: Prefer interfaces to abstract classes](#item-20-prefer-interfaces-to-abstract-classes)
+    * [Item 21: Design interfaces for posterity (future generations)](#item-21-design-interfaces-for-posterity-(future-generations))
+    * [Item 22: Use interfaces only to define types](#item-22-use-interfaces-only-to-define-types)
+    * [Item 23: Prefer class hierarchies to tagged classes](#item-23-prefer-class-hierarchies-to-tagged-classes)
+    * [Item 24: Favor static member classes over nonstatic](#item-24-favor-static-member-classes-over-nonstatic)
+    * [Item 25: Limit source files to a single top-level class](#item-25-limit-source-files-to-a-single-top-level-class)
 * [Chapter 5: Generics](#chapter-5-generics)
     * [Item 26: Don’t use raw types](#item-26-dont-use-raw-types)
     * [Item 27: Eliminate unchecked warnings](#item-27-eliminate-unchecked-warnings)
@@ -55,7 +55,9 @@
     * [Item 53: Use varargs judiciously](#item-53-use-varargs-judiciously)
     * [Item 54: Return empty collections or arrays, not nulls](#item-54-return-empty-collections-or-arrays-not-nulls)
     * [Item 55: Return optionals judiciously](#item-55-return-optionals-judiciously)
-
+    * [Item 56: Write doc comments for all exposed API elements](#item-56-write-doc-comments-for-all-exposed-api-elements)
+* [Chapter 9: General Programming](#chapter-9-general-programming)
+    * [Item 57: Minimize the scope of local variables](#item-57-minimize-the-scope-of-local-variables)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -381,7 +383,7 @@ comparison, and that’s exactly what the second comparator construction method,
 thenComparingInt, does.
 
 
-## Classes and Interfaces
+## Chapter 4: Classes and Interfaces
 
 ### Item 15: Minimize the accessibility of classes and members
 
@@ -1536,3 +1538,72 @@ Generally, if you find yourself writing a method that can’t always return a
 value and you believe it is important that users of the method consider this
 possibility every time they call it, then you should probably return an optional.
 Finally, you should rarely use an optional in any other capacity than as a return value.
+
+
+### Item 56: Write doc comments for all exposed API elements
+
+Javadoc generates API documentation automatically from source code
+with specially formatted documentation comments, more commonly known as
+doc comments.
+
+To document your API properly, you must precede every exported class,
+interface, constructor, method, and field declaration with a doc comment.
+
+Comments should describe what the method does and not how it does it, only exception
+are method in classes designed for inheritance.
+
+eg:
+```
+/**
+* Returns the element at the specified position in this list.    <-SUMMARY
+*
+*<p>This method is <i>not</i> guaranteed to run in constant      <-Further explanation/clarification
+* time. In some implementations it may run in time proportional
+* to the element position.
+*
+*@param index index of element to return; must be                <-PARAMETER #1
+* non-negative and less than the size of this list
+* @return the element at the specified position in this list     <- What it returns
+* @throws IndexOutOfBoundsException if the index is out of range <- Exception thrown
+* ({@code index < 0 || index >= this.size()})
+*/
+E get(int index);
+```
+
+If you want to describe how a method works (for inheritance percusses) you can use:
+
+@impSpec annotation:
+
+```
+/**
+* Returns true if this collection is empty.
+*
+*@implSpec
+* This implementation returns {@code this.size() == 0}.
+*
+*@return true if this collection is empty
+*/
+public boolean isEmpty() { ... }
+```
+
+In enums it is best to document all constants:
+
+```
+/**
+* An instrument section of a symphony orchestra.
+*/
+public enum OrchestraSection {
+    /** Woodwinds, such as flute, clarinet, and oboe. */
+    WOODWIND,
+    /** Brass instruments, such as french horn and trumpet. */
+    BRASS;
+}
+```
+
+## Chapter 9: General Programming
+
+### Minimie the scope of local variables
+
+
+
+
