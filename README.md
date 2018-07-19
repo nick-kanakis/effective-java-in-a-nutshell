@@ -61,25 +61,26 @@
     * [Item 58: Prefer for-each loops to traditional for loops](#item-58-prefer-for-each-loops-to-traditional-for-loops)
     * [Item 59: Know and use the libraries](#item-59-know-and-use-the-libraries)
     * [Item 60: Avoid float and double if exact answers are required](#item-60-avoid-float-and-double-if-exact-answers-are-required)
-    * [Item 61: Prefer primitive types to boxed primitives](#item-61-prefer-primitive-type-to-boxed-primitives)
+    * [Item 61: Prefer primitive types to boxed primitives](#item-61-prefer-primitive-types-to-boxed-primitives)
     * [Item 62: Avoid strings where other types are more appropriate](#item-62-avoid-strings-where-other-types-are-more-appropriate)
     * [Item 63: Beware the performance of string concatenation](#item-63-beware-the-performance-of-string-concatenation)
-    * [Item 64: Refer to objects by their interfaces](#item-64-refer-to-objects-by-their-interface)
+    * [Item 64: Refer to objects by their interfaces](#item-64-refer-to-objects-by-their-interfaces)
     * [Item 65: Prefer interfaces to reflection](#item-65-prefer-interfaces-to-reflection)
     * [Item 66: Use native methods judiciously](#item-66-use-native-methods-judiciously)
-    * [Item 67: Optimize judiciously](#item-67-optimize0judiciously)
+    * [Item 67: Optimize judiciously](#item-67-optimize-judiciously)
     * [Item 68: Adhere to generally accepted naming conventions](#item-68-adhere-to-generally-accepted-naming-conventions)
-* [Chapter 9: Exceptions](#chapter-9-exceptions)
+* [Chapter 10: Exceptions](#chapter-9-exceptions)
     * [Item 69: Use exceptions only for exceptional conditions](#item-69-use-exceptions-only-for-exceptional-conditions)
     * [Item 70: Use checked exceptions for recoverable conditions and runtime exceptions for programming errors](#item-70-use-checked-exceptions-for-recoverable-conditions-and-runtime-exceptions-for-programming-errors)
     * [Item 71: Avoid unnecessary use of checked exceptions](#item-71-avoid-unnecessary-use-of-checked-exceptions)
     * [Item 72: Favor the use of standard exceptions](#item-72-favor-the-use-of-standard-exceptions)
-    * [Item 73: Throw exceptions appropriate to the abstraction](#item-73-throw-excpetions-appropriate-to-the-abstraction)
+    * [Item 73: Throw exceptions appropriate to the abstraction](#item-73-throw-exceptions-appropriate-to-the-abstraction)
     * [Item 74: Document all exceptions thrown by each method](#item-74-document-all-exceptions-thrown-by-each-method)
-    * [Item 75: Include failure-capture information in detail messages](#item-75-include-failure-capture-information-in-datail-messages)
-    * [Item 76: Strive for failure atomicity](#item-76-strive-for-failure-atomicicy)
+    * [Item 75: Include failure-capture information in detail messages](#item-75-include-failure-capture-information-in-detail-messages)
+    * [Item 76: Strive for failure atomicity](#item-76-strive-for-failure-atomicity)
     * [Item 77: Don’t ignore exceptions](#item-77-dont-ignore-exceptions)
-
+* [Chapter 11: Concurrency](#chapter-10-concurrency)
+    * [Item 78: Synchronize access to shared mutable data](#item-78-synchronize-access-to-shared-mutable)
 
 
 ## Chapter 2: Creating and Destroying Objects
@@ -1779,7 +1780,7 @@ Common names for static factories include ```from```, ```of```, ```valueO```f, `
 ```getType```, and ```newType```
 
 
-## Exceptions
+## Chapter 10: Exceptions
 
 ### Item 69: Use exceptions only for exceptional conditions
 
@@ -1904,7 +1905,9 @@ to ignoring a fire alarm—and turning it off so no one else gets a chance to se
 there’s a real fire. And if you chose to ignore the exception at least
 write a comment explaining why?
 
+## Chapter 11: Concurrency
 
+### Item 78: Synchronize access to shared mutable data
 
 
 
