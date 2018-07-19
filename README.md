@@ -78,6 +78,7 @@
     * [Item 74: Document all exceptions thrown by each method](#item-74-document-all-exceptions-thrown-by-each-method)
     * [Item 75: Include failure-capture information in detail messages](#item-75-include-failure-capture-information-in-datail-messages)
     * [Item 76: Strive for failure atomicity](#item-76-strive-for-failure-atomicicy)
+    * [Item 77: Don’t ignore exceptions](#item-77-dont-ignore-exceptions)
 
 
 
@@ -1882,4 +1883,33 @@ values of all parameters and fields that contributed to the exception.
 
 
 ### Item 76: Strive for failure atomicity
+
+Generally speaking, a failed method invocation should leave the object in the state that it was in prior to the
+invocation.
+
+- The simplest way for this is to design immutable objects.
+- Another way is to check the parameters and throw exceptions before accessing the rest of the method and
+change the state of any object.
+- A third approach to achieving failure atomicity is to perform the operation on
+a temporary copy of the object and to replace the contents of the object with the
+temporary copy once the operation is complete.
+- A final way is to write recovery code that intercepts a failure that
+ occurs in the midst of an operation, and causes the object to roll back its state
+
+### Item 77: Don’t ignore exceptions
+
+An empty catch block defeats the purpose of exceptions, which is to
+force you to handle exceptional conditions. Ignoring an exception is analogous
+to ignoring a fire alarm—and turning it off so no one else gets a chance to see if
+there’s a real fire. And if you chose to ignore the exception at least
+write a comment explaining why?
+
+
+
+
+
+
+
+
+
 
