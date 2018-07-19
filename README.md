@@ -58,6 +58,28 @@
     * [Item 56: Write doc comments for all exposed API elements](#item-56-write-doc-comments-for-all-exposed-api-elements)
 * [Chapter 9: General Programming](#chapter-9-general-programming)
     * [Item 57: Minimize the scope of local variables](#item-57-minimize-the-scope-of-local-variables)
+    * [Item 58: Prefer for-each loops to traditional for loops](#item-58-prefer-for-each-loops-to-traditional-for-loops)
+    * [Item 59: Know and use the libraries](#item-59-know-and-use-the-libraries)
+    * [Item 60: Avoid float and double if exact answers are required](#item-60-avoid-float-and-double-if-exact-answers-are-required)
+    * [Item 61: Prefer primitive types to boxed primitives](#item-61-prefer-primitive-type-to-boxed-primitives)
+    * [Item 62: Avoid strings where other types are more appropriate](#item-62-avoid-strings-where-other-types-are-more-appropriate)
+    * [Item 63: Beware the performance of string concatenation](#item-63-beware-the-performance-of-string-concatenation)
+    * [Item 64: Refer to objects by their interfaces](#item-64-refer-to-objects-by-their-interface)
+    * [Item 65: Prefer interfaces to reflection](#item-65-prefer-interfaces-to-reflection)
+    * [Item 66: Use native methods judiciously](#item-66-use-native-methods-judiciously)
+    * [Item 67: Optimize judiciously](#item-67-optimize0judiciously)
+    * [Item 68: Adhere to generally accepted naming conventions](#item-68-adhere-to-generally-accepted-naming-conventions)
+* [Chapter 9: Exceptions](#chapter-9-exceptions)
+    * [Item 69: Use exceptions only for exceptional conditions](#item-69-use-exceptions-only-for-exceptional-conditions)
+    * [Item 70: Use checked exceptions for recoverable conditions and runtime exceptions for programming errors](#item-70-use-checked-exceptions-for-recoverable-conditions-and-runtime-exceptions-for-programming-errors)
+    * [Item 71: Avoid unnecessary use of checked exceptions](#item-71-avoid-unnecessary-use-of-checked-exceptions)
+    * [Item 72: Favor the use of standard exceptions](#item-72-favor-the-use-of-standard-exceptions)
+    * [Item 73: Throw exceptions appropriate to the abstraction](#item-73-throw-excpetions-appropriate-to-the-abstraction)
+    * [Item 74: Document all exceptions thrown by each method](#item-74-document-all-exceptions-thrown-by-each-method)
+    * [Item 75: Include failure-capture information in detail messages](#item-75-include-failure-capture-information-in-datail-messages)
+    * [Item 76: Strive for failure atomicity](#item-76-strive-for-failure-atomicicy)
+
+
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -1602,8 +1624,262 @@ public enum OrchestraSection {
 
 ## Chapter 9: General Programming
 
-### Minimie the scope of local variables
+### Item 57: Minimize the scope of local variables
+
+The most powerful technique for minimizing the scope of a local variable
+is to declare it where it is first used.
+
+You can declare multiple variables with for statement:
+
+```
+for (int i = 0, n = expensiveComputation(); i < n; i++) {
+    ... // Do something with i;
+}
+```
+
+Most importantly you should keep methods small and focused.
+
+### Item 58: Prefer for-each loops to traditional for loops
+
+for-each loop provides compelling advantages over the
+traditional for loop in clarity, flexibility, and bug prevention, with no
+performance penalty. Use for-each loops in preference to for loops wherever
+you can.
+
+### Item 59: Know and use the libraries
+
+Keep up to date with new libraries of Java, don’t reinvent the wheel.
+
+### Item 60: Avoid float and double if exact answers are required
+
+The float and double types are particularly ill-suited for monetary calculations,
+because it is impossible to represent 0.1 (or any other negative power of ten)
+as a float or double exactly.
 
 
+eg:
 
+```
+System.out.println(1.00 - 9 * 0.10);
+```
+Prints 0.09999999999999998.
+
+The right way to solve monetary problems is to use BigDecimal, int, or long.
+BigDecimal it a lot slower than int and long, so if you care about performance,
+keep track of the track of the decimal point yourself use int or long.
+
+If quantities don’t exceed nine decimal digits, you can use int; if they don’t
+exceed eighteen digits, you can use long. If the quantities might exceed
+eighteen digits, use BigDecimal.
+
+### Item 61: Prefer primitive types to boxed primitives
+
+Every primitive type has a corresponding reference type, called a boxed primitive. The
+boxed primitives corresponding to int, double, and boolean are Integer,
+Double, and Boolean.
+
+There are 2 major differences between primitives and boxed primitives.
+
+1) Primitives have only their values, whereas boxed primitives have identities
+  distinct from their values. In other words, two boxed primitive instances can
+  have the same value and different identities. This means that applying the == operator
+  to boxed primitives will almost always fail.
+
+2) Primitives are more time- and space efficient than boxed primitives.
+
+
+When your program does mixed-type computations
+involving boxed and unboxed primitives, it does unboxing, and when your
+program does unboxing, it can throw a NullPointerException
+
+Also when your program boxes primitive values, it can result in costly and
+unnecessary object creations
+
+### Item 62: Avoid strings where other types are more appropriate
+
+Avoid the natural tendency to represent objects as strings when
+better data types exist or can be written. Used inappropriately, strings are more
+cumbersome, less flexible, slower, and more error-prone than other types. Types
+for which strings are commonly misused include primitive types, enums, and
+aggregate types.
+
+### Item 63: Beware the performance of string concatenation
+
+Using the string concatenation operator (+) repeatedly to concatenate n strings
+requires time quadratic in n. This is an unfortunate consequence of the fact
+that strings are immutable. When two strings are concatenated, the
+contents of both are copied.
+
+To achieve acceptable performance, use a StringBuilder in place of a String
+
+### Item 64: Refer to objects by their interfaces
+
+If appropriate interface types exist, then parameters, return values,
+variables, and fields should all be declared using interface types.
+The only time you really need to refer to an object’s class is when you’re creating it
+with a constructor.
+
+This will make the switching implementations quite easy.
+
+### Item 65: Prefer interfaces to reflection
+
+1) You lose all the benefits of compile-time type checking, if a program attempts
+to invoke a nonexistent or inaccessible method reflectively,
+it will fail at runtime unless you’ve taken special precautions.
+
+2) The code required to perform reflective access is clumsy and verbose.
+
+3) Performance suffers. Reflective method invocation is much slower than
+   normal method invocation.
+
+
+If you need to  use a class that is unavailable at compile time, use a
+appropriate interface or superclass by which to refer to the class.
+
+### Item 66: Use native methods judiciously
+
+The Java Native Interface (JNI) allows Java programs to call native methods,
+which are methods written in native programming languages such as C or C++.
+
+It is rarely advisable to use native methods for improved performance. In
+early releases (prior to Java 3), it was often necessary, but JVMs have gotten
+much faster since then.
+
+Native code has many disadvantages:
+
+1) Native languages are not safe, applications using native methods are no longer
+   immune to memory corruption errors
+
+2) They are also harder to debug
+
+3) May decrease performance because the garbage collector can’t automate.
+
+
+### Item 67: Optimize judiciously
+
+Do not strive to write fast programs—strive to write good ones;
+speed will follow. But do think about performance while you’re designing
+systems, especially while you’re designing APIs, wire-level protocols, and
+persistent data formats. When you’ve finished building the system, measure its
+performance. If it’s fast enough, you’re done. If not, locate the source of the
+problem with the aid of a profiler and go to work optimizing the relevant parts of
+the system.
+
+### Item 68: Adhere to generally accepted naming conventions
+
+Type parameter names usually consist of a single letter. Most commonly it is
+one of these five: ```T``` for an arbitrary type, ```E``` for the element type of a collection, ```K```
+and ```V``` for the key and value types of a map, and ```X``` for an exception. The return
+type of a function is usually ```R```. A sequence of arbitrary types can be ```T, U, V``` or
+```T1, T2, T3```.
+
+
+Common names for static factories include ```from```, ```of```, ```valueO```f, ```instance```, ```getInstance```, ```newInstance```,
+```getType```, and ```newType```
+
+
+## Exceptions
+
+### Item 69: Use exceptions only for exceptional conditions
+
+Exceptions should never be used for ordinary control flow. This is also true for
+a well-designed API, it must not force its clients to use exceptions for ordinary control flow.
+For example, the Iterator interface has the state-dependent method next and
+the corresponding state-testing method hasNext. It allows the client of the API to
+check if next element is available and it does not force it to handle a potential exception.
+
+### Item 70: Use checked exceptions for recoverable conditions and runtime exceptions for programming errors
+
+Java provides three kinds of throwables: **checked exceptions**, **runtime exceptions**,
+and **errors**
+
+- Generally use **checked exceptions** for conditions from which the caller
+can reasonably be expected to recover. By throwing a checked exception, you
+force the caller to handle the exception in a catch clause or to propagate it outward.
+
+There are two kinds of unchecked throwables: **runtime exceptions** and **errors**.
+They are identical in their behavior: both are throwables that needn’t, and
+generally shouldn’t, be caught.
+
+- Use **runtime exceptions** to indicate programming errors. The great
+majority of runtime exceptions indicate precondition violations (eg: ArrayIndexOutOfBounds) .
+
+Sometimes it is difficult to know if it is a recoverable condition (so to use checked exceptions)
+or the problem will persist (and use unchecked exceptions). If it isn’t clear whether recovery is possible, you’re
+probably better off using an unchecked exception.
+
+It a conventions that errors are reserved for use by the JVM to indicate resource
+deficiencies, invariant failures, or other conditions that make it impossible to continue execution.
+Use only subclasses of RuntimeException for unchecked throwables and do not use Error.
+
+Do not forget that exceptions are classes and you shoul provide methods that help the caller
+to recover (for checked exceptions)
+
+### Item 71: Avoid unnecessary use of checked exceptions
+
+Remember: A method that throws checked exceptions cannot be used in streams!
+
+When used sparingly, checked exceptions can increase the
+reliability of programs; when overused, they make APIs painful to use. If callers
+won’t be able to recover from failures, throw unchecked exceptions. If recovery
+may be possible and you want to force callers to handle exceptional conditions,
+first consider returning an optional. Only if this would provide insufficient
+information (in order to recover from the error) in the case of failure should you throw a checked exception.
+
+
+### Item 72: Favor the use of standard exceptions
+
+Reusing standard exceptions has several benefits. Chief among them is that it
+makes your API easier to learn and use because it matches the established
+conventions that programmers are already familiar with.
+
+|Exception|Use|
+|:---|:----|
+|IllegalArgumentException|Non-null parameter value is inappropriate|
+|IllegalStateException|Object state is inappropriate for method invocation|
+|NullPointerException|Parameter value is null where prohibited|
+|IndexOutOfBoundsException|Index parameter value is out of range|
+|ConcurrentModificationException|Concurrent modification of an object has been detected where it is prohibited|
+|UnsupportedOperationException|Object does not support method|
+
+### Item 73: Throw exceptions appropriate to the abstraction
+
+Higher layers should catch lower-level exceptions and, in their place,
+throw exceptions that can be explained in terms of the higher-level abstraction.
+
+Exception chaining is called in cases the lower-level exception might be helpful to someone debugging
+the problem that caused the higher-level exception. The lower-level exception
+(the cause) is passed to the higher-level exception, which provides an accessor
+method (Throwable’s getCause method) to retrieve the lower-level exception. This
+technique is better than bubbling the exception to higher level but it should not be
+overused.
+
+eg:
+
+```
+// Exception Chaining
+try {
+    ... // Use lower-level abstraction to do our bidding
+} catch (LowerLevelException cause) {
+    throw new HigherLevelException(cause);
+}
+```
+
+
+### Item 74: Document all exceptions thrown by each method
+
+Always declare checked exceptions individually, and document precisely
+the conditions under which each one is thrown using the Javadoc @throws tag.
+
+Also don’t take the shortcut of declaring that a method throws some superclass of
+multiple exception classes that it can throw. As an extreme example, don’t
+declare that a public method throws Exception or, worse, throws Throwable.
+
+### Item 75: Include failure-capture information in detail messages
+
+To capture a failure, the detail message of an exception should contain the
+values of all parameters and fields that contributed to the exception.
+
+
+### Item 76: Strive for failure atomicity
 
