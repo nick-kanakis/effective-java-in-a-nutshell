@@ -47,6 +47,10 @@
     * [Item 39: Prefer annotations to naming patterns](#item-39-prefer-annotations-to-naming-patterns)
     * [Item 40: Consistently use the override annotation](#item-40-consistently-use-the-override-annotation)
     * [Item 41: Use marker interfaces to define types](#item-41-use-marker-interfaces-to-define-types)
+* [Chapter 7: Lambdas and Streams](#chapter-7-lambdas-and-streams)
+    * [Item 42: Prefer lambdas to anonymous classes](#item-42-prefer-lambdas-to-anonymous-classes)
+    * [Item 43: Prefer method references to lambdas](#item-43-prefer-method-references-to-lambdas)
+    * [Item 44: Favor the use of standard functional interfaces](#item-44-favor-the-use-of-standard-functional-interfaces)
 * [Chapter 8: Methods](#chapter-8-methods)
     * [Item 49: Check parameters for validity](#item-49-check-parameters-for-validity)
     * [Item 50: Make defensive copies when needed](#item-50-make-defensive-copies-when-needed)
@@ -69,7 +73,7 @@
     * [Item 66: Use native methods judiciously](#item-66-use-native-methods-judiciously)
     * [Item 67: Optimize judiciously](#item-67-optimize-judiciously)
     * [Item 68: Adhere to generally accepted naming conventions](#item-68-adhere-to-generally-accepted-naming-conventions)
-* [Chapter 10: Exceptions](#chapter-9-exceptions)
+* [Chapter 10: Exceptions](#chapter-10-exceptions)
     * [Item 69: Use exceptions only for exceptional conditions](#item-69-use-exceptions-only-for-exceptional-conditions)
     * [Item 70: Use checked exceptions for recoverable conditions and runtime exceptions for programming errors](#item-70-use-checked-exceptions-for-recoverable-conditions-and-runtime-exceptions-for-programming-errors)
     * [Item 71: Avoid unnecessary use of checked exceptions](#item-71-avoid-unnecessary-use-of-checked-exceptions)
@@ -1325,6 +1329,162 @@ a marker interface is the way to go. If you want to mark program elements other
 than classes and interfaces or to fit the marker into a framework that already
 makes heavy use of annotation types, then a marker annotation is the correct
 choice.
+
+## Chapter 7: Lambdas and Streams
+
+### Item 42: Prefer lambdas to anonymous classes
+
+Lambda expression is composed by 3 parts:
+
+- The list of parameters ```(Type1 t1, Type2 t2)```
+- An arrow ```->``` it separates teh patameters from the body
+- The Lambda body ```t1.getX().compareTo(t2.getX())```
+
+ ```(Type1 t1, Type2 t2) -> t1.getX().compareTo(t2.getX())```
+
+
+**Where to use lambda expressions?**
+
+You can use a lambda expression in the context of a functional interface.
+
+Functional Interface is a interfaces annotated with @FunctionInterface that has only one
+abstract method (it may have several default or static methods).
+
+*Example: behavior parameterization*: You may have multiple implementation of one interface you can create an anonymous class and implement the interface
+or you can create a lambda expression (faster and without boilerplate code). As long as the interface is a functional interface.
+
+**Type checking**
+
+The type of a lambda is deduced from the context in which the lambda is used. As a result he same lambda expression can
+be associated with different functional interfaces if they have a compatible abstract method signature.
+
+eg:
+
+```
+Callable<Integer> c = () -> 42;
+PrivilegedAction<Integer> p = () -> 42;
+```
+
+Omit the types of all lambda parameters unless their presence makes your program clearer
+
+**Exceptions**
+
+Lambdas can throw checked exceptions but non of the default functional interfaces provided by the JDK support one,
+so you will need to create one
+eg:
+
+```
+@FunctionalInterface
+public interface BufferedReaderProcessor {
+    String process(BufferedReader b) throws IOException;
+}
+BufferedReaderProcessor p = (BufferedReader br) -> br.readLine();
+```
+
+**Using local variables**
+
+Lambdas can access local variables as long as they are final or effective final
+eg:
+
+```
+final int portNumber = 1337;
+Runnable r = () -> System.out.println(portNumber); //works because portNumber is final
+
+int portNumber2 = 1337;
+Runnable r2 = () -> System.out.println(portNumber2); //works because portNumber2 is effective final since it does not change after instantiation
+
+int portNumber3 = 1337;
+Runnable r3 = () -> System.out.println(portNumber3); //Does not work because portNummber3 in not final or effective final
+int portNumber3 = 8080;
+
+```
+
+**Useful methods**
+
+Several functional interfaces in the Java 8 API contain convenient default methods.
+
+*Ordering*
+```
+Comparator.comparing(Apple::getWeight);
+//or
+list.sort(comparing(Apple::getWeight).reversed();
+```
+
+*Chaining*
+
+```
+Function<Integer, Integer> f = x+1;
+Function<Integer, Integer> g = x*2;
+Function<Integer, Integer> r = f.compose(g); // If x = 1, r = 3, f(g(1))
+Function<Integer, Integer> r2 = f.andThe(g); // if x = 1, r2 = 4, g(f(1))
+
+```
+
+
+Lambdas should be one line long or self-explanatory, if this is not true use a classic class to
+make the code cleaner to read and maintain.
+
+And lastly if you do not have a functional interface you must use anonymous method like before.
+
+### Item 43: Prefer method references to lambdas
+
+There is nothing you can do with lambda that you cannot do with method references.
+Where method references are shorter and clearer, use them; where they aren’t, stick with lambdas.
+
+|Method type|Example| Lambda|
+|:---|:----|:---|
+|Static |```Integer::parseInt ```|```str -> Integer.parseInt(str)```|
+|Bound |```Instant.now()::isAfter``` |```Instant then = Instant.now(); t -> then.isAfter(t)```|
+|Unbound |```String::toLowerCase```| ```str -> str.toLowerCase()```|
+|Class Constructor| ```TreeMap<K,V>::new ```|```() -> new TreeMap<K,V>```|
+|Array Constructor| ```int[]::new ```|```len -> new int[len]```
+
+
+If the constructor takes multiple arguments you can use method reference and the arguments will be deduced
+by the context.
+
+eg:
+
+```
+@FunctionalInterface
+public interface TriFunction<T, U, V, R>{
+    R apply(T t, U u, V v);
+}
+
+TriFunction<Integer, Integer, Integer, Color> colorFactory = Color::new;
+```
+
+
+### Item 44: Favor the use of standard functional interfaces
+
+If one of the standard functional interfaces does the job, you should
+generally use it in preference to a purpose-built functional interface.
+
+**Common functional interfaces in Java 8**
+
+|Functional interface|Function descriptor| Primitive specializations |
+|:---|:----|:---|
+|Predicate\<T>|T -> boolean|IntPredicate, LongPredicate, DoublePredicate |
+|Consumer\<T>|T -> void| IntConsumer, LongConsumer, DoubleConsumer |
+|Function\<T, R>|T -> R| IntFunction\<R>, IntToDoubleFunction, IntToLongFunction, LongFunction\<R>, LongToDoubleFunction, LongToIntFunction, DoubleFunction\<R>, ToIntFunction\<T>, ToDoubleFunction\<T>, ToLongFunction\<T>|
+|Supplier\<T>|() -> T| BooleanSupplier, IntSupplier, LongSupplier, DoubleSupplier |
+|UnaryOperator\<T>|T -> T| IntUnaryOperator, LongUnaryOperator, DoubleUnaryOperator |
+|BinaryOperator\<T>|(T, T) -> T| IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator |
+|BiPredicate\<L, R>| (L, R) -> boolean| |
+|BiConsumer\<T, U>| (T, U) -> void | ObjIntConsumer\<T>, ObjLongConsumer\<T>, ObjDoubleConsumer\<T>|
+|BiFunction\<T, U, R>| (T, U) -> R |ToIntBiFunction\<T, U>, ToLongBiFunction\<T, U>, ToDoubleBiFunction\<T, U>|
+
+With primitives use the specialized interfaces provided by the JDK, to avoid the cost off auto-boxing/unboxing.
+
+Sometimes you may need to provide your own functional interface even if the signatures matches a existing one this
+can happen for 2 reasons:
+1) Descriptive name for self-documentation.
+2) It can benefit from custom default methods.
+
+#################################################################################################################################
+#################################################################################################################################
+#################################################################################################################################
+
 
 ## Chapter 8: Methods
 
