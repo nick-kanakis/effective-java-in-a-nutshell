@@ -51,6 +51,7 @@
     * [Item 42: Prefer lambdas to anonymous classes](#item-42-prefer-lambdas-to-anonymous-classes)
     * [Item 43: Prefer method references to lambdas](#item-43-prefer-method-references-to-lambdas)
     * [Item 44: Favor the use of standard functional interfaces](#item-44-favor-the-use-of-standard-functional-interfaces)
+    * [Item 45: Use streams judiciously](#item-45-use-streams-judiciously)
 * [Chapter 8: Methods](#chapter-8-methods)
     * [Item 49: Check parameters for validity](#item-49-check-parameters-for-validity)
     * [Item 50: Make defensive copies when needed](#item-50-make-defensive-copies-when-needed)
@@ -1481,10 +1482,267 @@ can happen for 2 reasons:
 1) Descriptive name for self-documentation.
 2) It can benefit from custom default methods.
 
-#################################################################################################################################
-#################################################################################################################################
-#################################################################################################################################
 
+### Item 45: Use streams judiciously
+
+Stream is a sequence of elements from a source that supports data processing operations
+
+Basic operations:
+
+- **filter**: Takes a lambda to exclude certain elements from the stream.
+- **map**: Takes a lambda to transform an element into another one or to extract information.
+- **limit**: Truncates a stream to contain no more than a given number of elements.
+- **collect**: Converts a stream into another form.
+
+A collection is an in-memory data structure that holds all the values the data
+structure currently has—every element in the collection has to be computed before it can be
+added to the collection.
+
+By contrast, a stream is a conceptually fixed data structure (you can’t add or remove elements
+from it) whose elements are computed on demand.
+
+Keep in mind that a stream can be traversed only once. After that a stream is said
+to be consumed.
+
+eg:
+
+```
+Stram<String> s= titles.stream();
+s.forEach(System.out::println)
+s.forEach(System.out::println) //Will throw IllegalStateException since the stream is already consumed
+```
+
+**Stream common operations**
+
+Stream operations that can be connected are called *intermediate* operations (they return Stream<>), and operations
+that close a stream are called *terminal* operations.
+
+Intermediate operations don’t perform any processing until a terminal operation is invoked on the stream
+pipeline—they’re lazy.
+
+*Intermediate operations*:
+
+|Operation|Return type|Argument|Functional Descriptor| Purpose|
+|:---|:---|:---|:---|:---|
+|filter|Stream\<T>| Predicate\<T>|T -> boolean|Filter out data|
+|map|Stream\<R>|Function\<T, R>|T -> R|Transform data|
+|limit|Stream\<T>|||Limit data count|
+|sorted|Stream\<T>|Comparator\<T>|(T, T) -> int| Sorts data|
+|distinct|Stream\<T>|||Return all distinct data|
+|skip|Stream\<T>|long||skip first elements|
+|flatMap|Stream\<R>|Function<T, Stream\<R>>|T -> Stream<R>| flattens the nested Stream and perform a map operaiton|
+||Stream\<T>||||
+||Stream\<T>||||
+
+
+*Terminal operations*:
+
+|Operation|Purpose|
+|:---|:---|
+|forEach|Consumes each element from a stream and applies a lambda to each of them. The operation returns void.|
+|count|Returns the number of elements in a stream. The operation returns a long.|
+|collect|Reduces the stream to create a collection such as a List, a Map, or even an Integer|
+|anyMatch| Returns true if at least one value of stream returns true (when used in lambda)|
+|noneMatch| Returns true if non of the stream values returns true (when used in lambda)|
+|allMatch| Returns true if all values of stream returns true (when used in lambda)|
+|findAny| Returns an Optional that may contain a random value of the stream|
+|findFirst|Returns an Optional that may contain the first value of the stream|
+|reduce| Performs reduction operation (like sum, product ...) to the stream|
+|||
+
+**Operations in depth**
+
+*Filter*
+
+Takes as argument a predicate (a function returning a boolean) and returns a stream
+including all elements that match the predicate
+```
+List<Dish> vegetarianMenu = menu.stream()
+                                .filter(Dish::isVegeterian)
+                                .collect(toList()); //toList() is statically import default method of the Collection interface
+```
+
+**Distinct**
+
+Returns a stream with unique elements (according to the implementation of the hashCode
+and equals methods of the objects produced by the stream)
+
+```
+numbers.stream()
+       .filter(i -> i % 2 == 0)
+       .distinct()
+       .forEach(System.out::println);
+```
+
+*Limit*
+
+Returns another stream that’s no longer than a
+given size
+
+```
+List<Dish> shortMenu = menu.stream()
+                       .limit(3) //only first 3 elements will be added
+                       .collect(toList());
+```
+
+*Skip*
+
+Return a stream that discards the first n elements.
+```
+List<Dish> shortMenu = menu.stream()
+                       .skip(3) //first 3 elements will be skipped.
+                       .collect(toList());
+```
+
+*Map*
+
+Takes a function as argument. The function is applied to each element, mapping it into a new element.
+At the end a new stream is created.
+
+```
+List<String> dishNames = menu.stream()
+                             .map(Dish::getName)
+                             .collect(toList());
+```
+
+*FlatMap*
+
+FlatMap method lets you replace each value of a stream with another stream
+and then concatenates all the generated streams into a single stream.
+
+```
+List<List<String>> list = Arrays.asList(
+  Arrays.asList("a","c","d"),
+  Arrays.asList("b","f"));
+
+list.stream()
+    .flatMap(Collection::stream)
+    .collect(Collectors.toList());
+```
+
+The flatMap() method first flattens the input Stream of Streams to a Stream of Strings.
+Thereafter it works similarly to the map() method.
+
+*anyMatch, allMatch, noneMatch*
+
+- anyMatch method can be used to answer the question “Is there an element in the stream matching the given predicate?”
+- allMatch method works similarly to anyMatch but will check to see if all the elements of the stream match the given predicate
+- It ensures that no elements in the stream match the given predicate.
+
+
+```
+menu.stream().anyMatch(Dish::isVegetarian); //returns true if there is at least one dish that is vegetarian
+menu.stream().allMatch(d -> d.getCalories() < 1000); //returns true if all dishes are bellow 1000 calories
+menu.stream().noneMatch(d -> d.getCalories() > 1000); //returns true if there is no dish above 1000 calories
+```
+
+
+*findAny*
+
+Returns an arbitrary element of the current stream, it returns an Optional that forces the client
+to handle the case that the Stream is empty.
+
+```
+menu.stream()
+    .filter(Dish::isVegetarian)
+    .findAny()
+    .ifPresent(d ->System.out.Println(d.getName()))
+
+```
+
+
+*reduce*
+
+With reduce you can add/multiply/divide etc. all elements. It takes 2 arguments:
+- an initial value
+- a BinaryOperator\<T> to combine 2 elements and produce a new value
+
+```
+int sum = numbers.stream().reduce(0,(a,b) -> a + b);
+int produt = numbers.stream().reduce(1,(a,b) -> a * b);
+```
+
+Compute max, min with reduce
+
+```
+int max = numbers.stream().reduce(0,Integer::max);
+int min = numbers.stream().reduce(0,Integer::min);
+
+//or
+int max = numbers.stream().reduce(0,(x,y)->x>y?x:y);
+int min = numbers.stream().reduce(0,(x,y)->x<y?x:y);
+
+```
+
+***Primitive stream specializations*
+
+- IntStream
+- DoubleStream
+- LongStream
+
+
+*mapToInt, mapToDouble, mapToLong.*
+
+Are used to create primitive stream from complex objects.
+
+```
+IntStream intStream = menu.stream().mapToInt(Dish::getCalories);
+
+int sum = intStream.sum()
+```
+
+*max*
+
+Returns an primitive specialisation of Optional (OptionalInt, OptionalLong, OptionalDouble).
+Can only be used with primitive streams.
+
+*sum*
+
+Returns the sum of a primitive stream
+
+*range, rangeClosed*
+
+Both methods take the starting value of the range as the first parameter and the
+end value of the range as the second parameter. But range is exclusive, whereas rangeClosed is
+inclusive.
+
+
+**Creating a Stream**
+
+
+You can use *Stream.of* to create a stream.
+
+eg:
+```
+Stream<String> stream = Stream.of("Java 8 ", "Lambdas ", "In ", "Action");
+```
+
+From an array you can do:
+
+```
+int[] numArray = {2,3,4,5,6}
+IntStream stream = Arrays.stream(numArray)
+```
+
+You can also create streams from files.
+
+Create an infinite stream:
+
+- The *iterate* method takes an initial value, here 0, and a lambda (of type Unary-Operator\<T>) to
+  apply successively on each new value produced
+- The *generate* method takes a lambda of type Supplier\<T> to provide new values
+```
+Stream.iterate(0, n -> n + 2)
+      .limit(10)
+      .forEach(System.out::println);
+
+Stream.generate(Math::random)
+      .limit(5)
+      .forEach(System.out::println);
+```
+#################################################################################################################################
+#################################################################################################################################
+#################################################################################################################################
 
 ## Chapter 8: Methods
 
