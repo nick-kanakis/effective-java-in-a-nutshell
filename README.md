@@ -1740,6 +1740,91 @@ Stream.generate(Math::random)
       .limit(5)
       .forEach(System.out::println);
 ```
+
+**Collectors interface**
+
+*Collectors.maxBy, Collectors.minBy*
+
+These two collectors take a Comparator as argument to compare the elements in the stream.
+
+```
+Comparator<Dish> dishCaloriesComparator = Comparator.comparingInt(Dish::getCalories);
+Optional<Dish> mostCalorieDish = menu.stream().collect(maxBy(dishCaloriesComparator)); //Optional in cas the menu is empty
+```
+
+
+*Collectors.summingInt, Collectors.summingLong, Collectors.summingDouble*
+*Collectors.averagingInt, Collectors.averagingLong, Collectors.averagingDouble*
+
+It accepts a function that maps an object into the int that has to be summed/averaged.
+
+```
+int totalCalories = menu.stream().collect(summingInt(Dish::getCalories));
+double avgCalories = menu.stream().collect(averagingInt(Dish::getCalories));
+```
+
+*Collectors.summarizingInt, Collectors.summarizingLong, Collectors.summarizingDouble*
+
+It obtains the sum, average, maximum, and minimum.
+
+```
+IntSummaryStatistics menuStatistics = menu.stream().collect(summarizingInt(Dish::getCalories));
+
+IntSummaryStatistics{count=9, sum=4300, min=120, average=477.777778, max=800}
+```
+
+*Collectors.joining*
+
+Concatenates into a single string all strings resulting from invoking the toString method on each object in the stream,
+it uses StringBuilder.
+
+```
+String shortMenu = menu.stream().map(Dish::getName).collect(joining());
+String shortMenu = menu.stream().map(Dish::getName).collect(joining(", "));
+```
+
+
+*Collectors.groupingBy*
+
+The method takes a Function as input that is used to classify (separate) the elements, the result is a Map
+that has a key the value that is returned by the classification function and value a list of all the items in the stream having
+that classified value.
+
+```
+Map<Dish.Type, List<Dish>> dishesByType = menu.stream().collect(groupingBy(Dish::getType));
+
+/*
+It returns:
+{FISH=[prawns, salmon], OTHER=[french fries, rice, season fruit, pizza], MEAT=[pork, beef, chicken]}
+*/
+```
+
+If you want you can use the overloaded groupBy method that takes 2 arguments the first is the classification method, and the other
+is a Collector type.
+
+```
+Map<Dish.Type, Long> typesCount = menu.stream().collect( groupingBy(Dish::getType, counting()));
+/*
+    The result is the following Map:
+    {MEAT=3, FISH=2, OTHER=4}
+*/
+```
+
+*Collectors.partitioningBy*
+
+Takes a Predicate as argument and is used as a partitioning function. This is basically a grouping function
+that group in key=true the values that return true, and in key=false the values that return false.
+
+```
+Map<Boolean, List<Dish>> = menu.stream().collect(partitioningBy(Dish::isVegeterian))
+
+/*
+Returns the following map:
+{false=[pork, beef, chicken, prawns, salmon],
+true=[french fries, rice, season fruit, pizza]}
+*/
+```
+
 #################################################################################################################################
 #################################################################################################################################
 #################################################################################################################################
