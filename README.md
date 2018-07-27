@@ -52,6 +52,9 @@
     * [Item 43: Prefer method references to lambdas](#item-43-prefer-method-references-to-lambdas)
     * [Item 44: Favor the use of standard functional interfaces](#item-44-favor-the-use-of-standard-functional-interfaces)
     * [Item 45: Use streams judiciously](#item-45-use-streams-judiciously)
+    * [Item 46: Prefer side-effect-free functions in streams](#item-46-prefer-side-effect-free-functions-in-streams)
+    * [Item 47: Prefer Collection to Stream as a return type](#item-47-prefer-collection-to-stream-as-a-return-type)
+    * [Item 48: Use caution when making streams parallel](#item-48-use-caution-when-making-stream-parallel)
 * [Chapter 8: Methods](#chapter-8-methods)
     * [Item 49: Check parameters for validity](#item-49-check-parameters-for-validity)
     * [Item 50: Make defensive copies when needed](#item-50-make-defensive-copies-when-needed)
@@ -1487,13 +1490,6 @@ can happen for 2 reasons:
 
 Stream is a sequence of elements from a source that supports data processing operations
 
-Basic operations:
-
-- **filter**: Takes a lambda to exclude certain elements from the stream.
-- **map**: Takes a lambda to transform an element into another one or to extract information.
-- **limit**: Truncates a stream to contain no more than a given number of elements.
-- **collect**: Converts a stream into another form.
-
 A collection is an in-memory data structure that holds all the values the data
 structure currently has—every element in the collection has to be computed before it can be
 added to the collection.
@@ -1511,6 +1507,23 @@ Stram<String> s= titles.stream();
 s.forEach(System.out::println)
 s.forEach(System.out::println) //Will throw IllegalStateException since the stream is already consumed
 ```
+
+Complex streams should be avoided and replaced with iterative style programming, to make them
+easier to read/write and specialy to maintain.
+
+To increase the readability & maintainability of stream:
+- In the absence of explicit types, careful naming of lambda parameters is essential.
+- Use helper method whenever possible.
+
+If you need to:
+- Modify external variables
+- Throw checked exceptions
+- Use continue, break in a loop
+- Return from an enclosing method
+
+Prefer the iterative approach since none of these is possible in streams!
+
+#### A comprehensive guide to streams
 
 **Stream common operations**
 
@@ -1531,9 +1544,6 @@ pipeline—they’re lazy.
 |distinct|Stream\<T>|||Return all distinct data|
 |skip|Stream\<T>|long||skip first elements|
 |flatMap|Stream\<R>|Function<T, Stream\<R>>|T -> Stream<R>| flattens the nested Stream and perform a map operaiton|
-||Stream\<T>||||
-||Stream\<T>||||
-
 
 *Terminal operations*:
 
@@ -1548,7 +1558,6 @@ pipeline—they’re lazy.
 |findAny| Returns an Optional that may contain a random value of the stream|
 |findFirst|Returns an Optional that may contain the first value of the stream|
 |reduce| Performs reduction operation (like sum, product ...) to the stream|
-|||
 
 **Operations in depth**
 
@@ -1562,7 +1571,7 @@ List<Dish> vegetarianMenu = menu.stream()
                                 .collect(toList()); //toList() is statically import default method of the Collection interface
 ```
 
-**Distinct**
+*Distinct*
 
 Returns a stream with unique elements (according to the implementation of the hashCode
 and equals methods of the objects produced by the stream)
@@ -1650,7 +1659,6 @@ menu.stream()
 
 ```
 
-
 *reduce*
 
 With reduce you can add/multiply/divide etc. all elements. It takes 2 arguments:
@@ -1674,7 +1682,7 @@ int min = numbers.stream().reduce(0,(x,y)->x<y?x:y);
 
 ```
 
-***Primitive stream specializations*
+**Primitive stream specializations**
 
 - IntStream
 - DoubleStream
@@ -1825,9 +1833,47 @@ true=[french fries, rice, season fruit, pizza]}
 */
 ```
 
-#################################################################################################################################
-#################################################################################################################################
-#################################################################################################################################
+**Collector interface**
+
+The Collector interface consists of a set of methods that provide a blueprint for how to
+implement specific reduction operations (that is, collectors), toList and groupingBy are some that
+implement the Collector interface.
+
+You can develop your own collectors by implementing the methods defined in the Collector interface.
+
+### Item 46: Prefer side-effect-free functions in streams
+
+The forEach operation should be used only to report the result of a stream computation,
+not to perform the computation.
+
+Use the method provide by the ```Collectors``` interface whenever possible.
+
+### Item 47: Prefer Collection to Stream as a return type
+
+When writing a method that returns a sequence of elements,
+remember that some of your users may want to process them as a stream while
+others may want to iterate over them.
+
+Collection or an appropriate subtype is generally the best return type
+for a public, sequence-returning method, because it is a subtype of Iterable and has a stream method
+
+### Item 48: Use caution when making streams parallel
+
+*parallel*
+
+With the use of parallel method the stream is internally divided into multiple chunks that
+will run in parallel.
+
+Parallelizing a pipeline is unlikely to increase its performance
+if the source is from Stream.iterate, or the intermediate operation limit is used.
+
+As a rule, performance gains from parallelism are best on streams over
+ArrayList, HashMap, HashSet, and ConcurrentHashMap instances;
+arrays; int ranges; and long ranges. Generally if a data structures can all accurately and cheaply split into
+subranges of any desired sizes, it makes it easy to divide work among parallel threads.
+
+It is important to remember that some stream operations are more parallelizable than others. It is crucial to
+benchmark the code when trying to use ```parallel()```
 
 ## Chapter 8: Methods
 
