@@ -89,7 +89,9 @@
     * [Item 77: Don’t ignore exceptions](#item-77-dont-ignore-exceptions)
 * [Chapter 11: Concurrency](#chapter-10-concurrency)
     * [Item 78: Synchronize access to shared mutable data](#item-78-synchronize-access-to-shared-mutable)
-
+    * [Item 79: Avoid excessive synchronization](#item-79-avoid-excessive-synchronization)
+    * [Item 80: Prefer executors, tasks, and streams to threads](#item-80-prefer-executors-tasks-and-streams-to-threads)
+    * [Item 81: Prefer concurrency utilities to wait and notify](#item-81-prefer-concurrency-utilities-to-wait-and-notify)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -2459,9 +2461,98 @@ write a comment explaining why?
 ### Item 78: Synchronize access to shared mutable data
 
 
+Synchronization is required for reliable communication between threads as well as for mutual exclusion.
+
+A "synchronized" keyword does 2 thinks:
+
+1) Prevents an object from being seen in an inconsistent state by one thread while it’s being modified by another.
+2) It ensures that each thread entering a synchronized method or block sees the effects of all previous modifications
+ that were guarded by the same lock.
+
+eg:
+```
+public class StopThread {
+    private static boolean stopRequested;
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread backgroundThread = new Thread(() -> {
+        int i = 0;
+        while (!stopRequested)
+            i++;
+        });
+        backgroundThread.start();
+        TimeUnit.SECONDS.sleep(1);
+        stopRequested = true;
+    }
+}
+```
+
+Because the access to ```stopRequested``` value is not synchronized the thread will run forever!
+
+You need to control the access of ```stopRequested``` with synchronized in both read and write!
+Synchronization is not guaranteed to work unless both read and write operations are synchronized
 
 
+```
+// Properly synchronized cooperative thread termination
+public class StopThread {
+    private static boolean stopRequested;
+
+    private static synchronized void requestStop() {
+        stopRequested = true;
+    }
+
+    private static synchronized boolean stopRequested() {
+        return stopRequested;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+    Thread backgroundThread = new Thread(() -> {
+        int i = 0;
+        while (!stopRequested())
+            i++;
+    });
+
+    backgroundThread.start();
+    TimeUnit.SECONDS.sleep(1);
+    requestStop();
+    }}
+```
+
+If a value is atomic like here you may use ```volatile``` to ensure that each thread reads the latest value of
+```stopRequested```
+
+```
+    private static volatile boolean stopRequested;
+```
+
+But the best way for multithreaded environments is to avoid sharing mutable object and share only
+immutable or effective immutable data (data that change only once and never again)
+
+### Item 79: Avoid excessive synchronization
+
+Inside a synchronized region, do not invoke a method that is designed to be overridden, or one
+provided by a client in the form of a function object.
+
+As a rule, you should do as little work as possible inside synchronized regions.
+
+Also now that all servers/pcs are multicore it is a waste of time to synchronize code.
+
+When you are writing a mutable class, you have two options:
+1) you can omit all synchronization and allow the client to synchronize externally if concurrent use
+is desired,
+2) you can synchronize internally, making the class thread-safe
+
+You should choose the latter option only if you can achieve significantly
+higher concurrency with internal synchronization than you could by having the
+client lock the entire object externally.
 
 
+### Item 80: Prefer executors, tasks, and streams to threads
 
+Prefer tasks (and task executors) instead of threads.
 
+In Java 7, the Executor Framework was extended to support fork-join tasks, writing and tuning fork-join tasks is tricky.
+Use Parallel streams are written atop fork join pools and allow you to take advantage of their performance benefits.
+
+### Item 81: Prefer concurrency utilities to wait and notify
