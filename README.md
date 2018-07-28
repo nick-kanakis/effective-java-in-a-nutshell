@@ -87,11 +87,19 @@
     * [Item 75: Include failure-capture information in detail messages](#item-75-include-failure-capture-information-in-detail-messages)
     * [Item 76: Strive for failure atomicity](#item-76-strive-for-failure-atomicity)
     * [Item 77: Don’t ignore exceptions](#item-77-dont-ignore-exceptions)
-* [Chapter 11: Concurrency](#chapter-10-concurrency)
+* [Chapter 11: Concurrency](#chapter-11-concurrency)
     * [Item 78: Synchronize access to shared mutable data](#item-78-synchronize-access-to-shared-mutable)
     * [Item 79: Avoid excessive synchronization](#item-79-avoid-excessive-synchronization)
     * [Item 80: Prefer executors, tasks, and streams to threads](#item-80-prefer-executors-tasks-and-streams-to-threads)
     * [Item 81: Prefer concurrency utilities to wait and notify](#item-81-prefer-concurrency-utilities-to-wait-and-notify)
+    * [Item 82: Document thread safety](#item-82-document-thread-safety)
+    * [Item 83: Use lazy initialization judiciously](#item-83-use-lazy-initialization-judiciously)
+    * [Item 84: Don’t depend on the thread scheduler](#item-84-dont-depend-on-the-thread-scheduler)
+* [Chapter 12. Serialization](#chapter-12-serialization)
+    * [Item 85: Prefer alternatives to Java serialization](#item-85-prefer-alternatives-to-java-serialization)
+    * [Item 86: Implement Serializable with great caution](#item-86-implement-serializable-with-great-caution)
+    * [Item 87: Consider using a custom serialized form](#item-87-consider-using-a-custom-serialized-form)
+    * [Item 88: Write readObject methods defensively](#item-88-write-readobject-methods-defensively)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -2556,3 +2564,137 @@ In Java 7, the Executor Framework was extended to support fork-join tasks, writi
 Use Parallel streams are written atop fork join pools and allow you to take advantage of their performance benefits.
 
 ### Item 81: Prefer concurrency utilities to wait and notify
+
+Given the difficulty of using wait and notify correctly, you should use the higher-level
+concurrency utilities in java.util.concurrent (Executor Framework, concurrent collections, synchronizers).
+
+**Concurrent Collections**
+
+The concurrent collections are high-performance concurrent implementations
+of standard collection interfaces such as List, Queue, and Map. To provide
+high concurrency, these implementations manage their own synchronization
+internally.
+
+> Use ConcurrentHashMap in preference to Collections.synchronizedMap.
+
+
+**Synchronizers**
+
+Synchronizers are objects that enable threads to wait for one another, allowing
+them to coordinate their activities. The most commonly used synchronizers are
+CountDownLatch and Semaphore.
+
+Countdown latches are single-use barriers that allow one or more threads to
+wait for one or more other threads to do something. The sole constructor for
+CountDownLatch takes an int that is the number of times the countDown
+method must
+
+
+### Item 82: Document thread safety
+
+To enable safe concurrent use, a class must clearly document what level of thread safety it supports.
+
+Every class should clearly document its thread safety properties
+with a carefully worded prose description or a thread safety annotation (Immutable, ThreadSafe, and NotThreadSafe)
+
+### Item 83: Use lazy initialization judiciously
+
+Lazy initialization is a double-edged sword.
+It decreases the cost of initializing a class or creating an instance, at the
+expense of increasing the cost of accessing the lazily initialized field.
+In the presence of multiple threads, lazy initialization is tricky and should be avoided.
+
+If you need to use lazy initialization for performance on a static field, use
+the lazy initialization holder class idiom
+
+```
+private static class FieldHolder {
+    static final FieldType field = computeFieldValue();
+}
+private static FieldType getField() { return FieldHolder.field; }
+```
+
+If you need to use lazy initialization for performance on an instance field,
+use the double-check idiom.
+
+```
+private volatile FieldType field;
+private FieldType getField() {
+    FieldType result = field;
+    if (result == null) { // First check (no locking)
+        synchronized(this) {
+            if (field == null) // Second check (with locking)
+                field = result = computeFieldValue();
+            }
+   }return result;
+}
+```
+
+### Item 84: Don’t depend on the thread scheduler
+
+Any program that relies on the thread scheduler for correctness or performance is likely to be
+nonportable.
+
+As a corollary, do not rely on Thread.yield or thread priorities. These facilities
+are merely hints to the scheduler.
+
+## Chapter 12. Serialization
+
+### Item 85: Prefer alternatives to Java serialization
+
+Fundamental problem with serialization is that its attack surface is too big to
+protect, and constantly growing
+
+There is no reason to use Java serialization in any new system you write.
+
+A few other ways  for translating between objects and byte sequences that avoid
+many of the dangers of Java serialization are:
+
+- JSON
+- Protocol Buffers (protobuf)
+
+The most significant differences between JSON and protobuf are that JSON is
+text-based and human-readable, whereas protobuf is binary and substantially
+more efficient; and that JSON is exclusively a data representation, whereas
+protobuf offers schemas (types) to document and enforce appropriate usage.
+Although protobuf is more efficient than JSON, JSON is extremely efficient for
+a text-based representation.
+
+### Item 86: Implement Serializable with great caution
+
+Disadvantages of Serializable:
+
+1) It decreases the flexibility to change a class’s implementation once it has been released.
+2) It increases the likelihood of bugs and security holes.
+3) It increases the testing burden associated with releasing a new version of a class.
+4) Classes that are design for inheritance should not implement Serializable.
+5) You should not implement Serializable in a inner class.
+
+### Item 87: Consider using a custom serialized form
+
+If you have to use Serializable you must consider the create your own serialized form
+
+The default serialized form is likely to be appropriate if an object’s
+physical representation is identical to its logical content. But even then it is best to provide a
+```readObject``` method to ensure invariants and security.
+
+A class that is serializable makes the private field part of the exposed API,
+use @serial tag tells Javadoc to place this documentation on a special page that
+documents serialized forms.
+
+Every instance field that can be declared transient should be otherwise it will be serialized when the
+```defaultWriteObject``` method is invoked
+
+Finally regardless of what serialized form you choose, declare an explicit serial
+version UID in every serializable class you write.
+
+```
+private static final long serialVersionUID = randomLongValue;
+```
+
+It doesn’t matter what value you choose for
+randomLongValue. You can generate the value by running the serialver
+utility on the class, but it’s also fine to pick a number out of thin air. It is not
+required that serial version UIDs be unique.
+
+### Item 88: Write readObject methods defensively
