@@ -100,6 +100,8 @@
     * [Item 86: Implement Serializable with great caution](#item-86-implement-serializable-with-great-caution)
     * [Item 87: Consider using a custom serialized form](#item-87-consider-using-a-custom-serialized-form)
     * [Item 88: Write readObject methods defensively](#item-88-write-readobject-methods-defensively)
+    * [Item 89: For instance control, prefer enum types to readResolve](#item-89-for-instance-control-prefer-enum-types-to-readresolve)
+    * [Item 90: Consider serialization proxies instead of serialized instances](#item-90-consider-serialization-proxies-instead-of-serialized-instances)
 
 ## Chapter 2: Creating and Destroying Objects
 ### Item 1: Consider static factory methods instead of constructors
@@ -2698,3 +2700,38 @@ utility on the class, but it’s also fine to pick a number out of thin air. It 
 required that serial version UIDs be unique.
 
 ### Item 88: Write readObject methods defensively
+
+readObject method is effectively another public
+constructor, and it demands all of the same care as any other constructor (validity checks & defensive copying).
+
+How to write a readObject method:
+
+- For classes with object reference fields that must remain private, defensively
+ copy each object in such a field. Mutable components of immutable classes
+ fall into this category.
+- Check any invariants and throw an InvalidObjectException if a
+  check fails. The checks should follow any defensive copying.
+- Do not invoke any overridable methods in the class, directly or indirectly.
+
+### Item 89: For instance control, prefer enum types to readResolve
+
+Use enum types to enforce instance control invariants wherever
+possible.
+
+```
+public enum Elvis {
+    INSTANCE;
+    private String[] favoriteSongs = { "Hound Dog", "Heartbreak Hotel" };
+    public void printFavorites() {
+        System.out.println(Arrays.toString(favoriteSongs));
+    }
+}
+```
+
+
+### Item 90: Consider serialization proxies instead of  serialized instances
+
+Consider the serialization proxy pattern whenever you find
+yourself having to write a readObject or writeObject method on a class
+that is not extendable by its clients.
+
