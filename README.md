@@ -423,8 +423,7 @@ public int compareTo(PhoneNumber pn) {
 ```
 
 If two phone numbers have the same area code, we need to further refine the
-comparison, and that’s exactly what the second comparator construction method,
-thenComparingInt, does.
+comparison, and that’s exactly what the second comparator method, thenComparingInt, does.
 
 
 ## Chapter 4: Classes and Interfaces
@@ -453,7 +452,6 @@ Sorted (private >>> public)
  where it is declared.
 - **protected**. The member is accessible from subclasses of the class where it is
 declared and from any class in the package where it is declared.
-- **protected**.
 - **public**.
 
 Private & Package private members are part of class's implementation and do not impact the
@@ -461,7 +459,7 @@ exposed API.
 
 Why minimize the expose of members, classes?
 
-1) Decoubles components.
+1) Decouples components.
 2) It eases the burden of maintenance.
 3) Increase software reuse.
 4) Decreases the risk of creating large systems.
@@ -517,7 +515,7 @@ Advantages of immutable objects:
 was created, and it will remain like this until it is collected by the gc.
 - Immutable objects are inherently thread-safe; they require no
 synchronization.
-- You do not need Clonable if a object is immutable.
+- You do not need Cloneable if a object is immutable.
 - They make great building blocks for other objects.
 
 If you cannot make the class immutable limit it's immutability as much as possible
@@ -527,8 +525,7 @@ requires a new instance for every different state it is?
 
 This is something to take into consideration, if the object is small make it immutable,
 if it is large try to make it as immutable as possible ( by making fields final etc...).
-Also you can internally ise a package-private mutable companion class! that it uses to speed up
-expensive computations
+Also you can internally use a package-private mutable companion class that it uses to speed up expensive computations
 
 ### Item 18: Favor composition over inheritance
 
