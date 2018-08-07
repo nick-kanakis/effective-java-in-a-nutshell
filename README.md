@@ -167,7 +167,7 @@ created by caching same used objects or by providing a singleton instance.
 - Prefer primitives (int, boolean, long...) to boxed primitives (Integer, Boolean, Long...),
 also watch out for unintentional autoboxing.
 
-#### Item 7: Eliminate obsolete object references
+### Item 7: Eliminate obsolete object references
 
 Remove obsolete references to objects that are not needed any more.
 
@@ -186,7 +186,7 @@ Be extra careful when:
 
 On way to solve these kind of problems is to use WeakHashMap.
 
-#### Item 8: Avoid finalizers and cleaners
+### Item 8: Avoid finalizers and cleaners
 
 Disadvantages:
 1) There is no guarantee they’ll be executed promptly (or that they will ever run),
@@ -335,7 +335,7 @@ return result;
 
 ### Item 12: Always override toString
 
-providing a good toString implementation makes your class much more pleasant
+Providing a good toString implementation makes your class much more pleasant
 to use and makes systems using the class easier to debug.
 
 It is best to add comment to specify the format of the the toString() method
