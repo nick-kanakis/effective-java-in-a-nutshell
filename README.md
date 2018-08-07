@@ -479,14 +479,14 @@ to follow this advise and for immutable fields.
 An immutable class is simply a class whose instances cannot be modified.
 
 How to make a class immutable:
-1) Don’t provide methods that modify the object’s state.
+1) Don’t provide methods that modify the object’s state. *(Check Item 50 for more information about pass-by-value)*
 2) Ensure that the class can’t be extended (Make the class final or make the constructor private, the latest is better because
 it allows for future refactoring, by adding a new inner subclass).
 3) Make all fields final (you can have non-final fields as long as you control the access to it and return only
 cached results, to avoid the recalculation cost).
 4) Make all fields private. To avoid clients obtaining access to a field and modifying it.
 5) Ensure exclusive access to any mutable components. If a field is mutable make sure that the
-client cannot obtain a reference to these objects, make defensive copies in constructors, accessors.
+client cannot obtain a reference to these objects, make defensive copies in constructors, accessors. *(Check Item 50 for more information about pass-by-value)*
 
 eg:
 
@@ -526,6 +526,9 @@ requires a new instance for every different state it is?
 This is something to take into consideration, if the object is small make it immutable,
 if it is large try to make it as immutable as possible ( by making fields final etc...).
 Also you can internally use a package-private mutable companion class that it uses to speed up expensive computations
+
+**Tip: ** When creating a new class start by making everything immutable (and inaccessible) change only the things that you need to make them
+mutable (& accessible)
 
 ### Item 18: Favor composition over inheritance
 
@@ -576,17 +579,9 @@ public class ForwardingSet<E> implements Set<E> {
     public ForwardingSet(Set<E> s) { this.s = s; }
     public void clear() { s.clear(); }
     public boolean contains(Object o) { return s.contains(o); }
-    public boolean isEmpty() { return s.isEmpty(); }
-    public int size() { return s.size(); }
-    public Iterator<E> iterator() { return s.iterator(); }
-    public boolean add(E e) { return s.add(e); }
-    public boolean remove(Object o) { return s.remove(o); }
-    public boolean containsAll(Collection<?> c) { return s.containsAll(c); }
-    public boolean addAll(Collection<? extends E> c) { return s.addAll(c); }
-    public boolean removeAll(Collection<?> c) { return s.removeAll(c); }
-    public boolean retainAll(Collection<?> c) { return s.retainAll(c); }
-    public Object[] toArray() { return s.toArray(); }
-    public <T> T[] toArray(T[] a) { return s.toArray(a); }
+    .
+    .
+    .
 
     @Override public boolean equals(Object o) { return s.equals(o); }
     @Override public int hashCode() { return s.hashCode(); }
@@ -595,7 +590,7 @@ public class ForwardingSet<E> implements Set<E> {
 ```
 
 The advantages of this approach is that the forwarding class can be used by many classes that may want to
-compose the Set<E> Interface. This approach is a decorator pattern.
+compose the Set\<E> Interface. This approach is a decorator pattern.
 
 ### Item 19: Design and document for inheritance or else prohibit it
 
@@ -606,7 +601,7 @@ How to design for inheritance:
 2) You should add hooks into its internal workings in the form of judiciously chosen protected methods. The subclass can
 use these methods (hooks) more easily than overriding and rewriting parts of the superclass.
 
-You will need to commit forever to these 2 patterns (documentation,hooks).
+You will need to commit forever to these 2 patterns (documentation, hooks).
 
 
 ### Item 20: Prefer interfaces to abstract classes
@@ -702,11 +697,11 @@ implement the interface directly.
 
 In order to write "Skeletal" or AbstractXXX class:
 
-1) study the interface and decide which methods are the primitives in
+1) Study the interface and decide which methods are the primitives in
 terms of which the others can be implemented. These primitives will be the
 abstract methods in your skeletal implementation.
 
-2) provide default methods in the interface for all of the methods that can be implemented directly atop the
+2) Provide default methods in the interface for all of the methods that can be implemented directly atop the
 primitives, but recall that you may not provide default methods for Object
 methods such as equals and hashCode.
 
