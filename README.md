@@ -956,14 +956,14 @@ This means that Iterable can be any time that is subtype of E, or E itshelf.
 For maximum flexibility, use wildcard types on input parameters that represent producers or consumers.
 
 **PECS stands for producer-extends, consumer-super.**
-- if a parameterized type represents a T producer, use **<?extends T>**
+- if a parameterized type represents a T producer, use **<? extends T>**
 - if it represents a T consumer, use **<? super T>**.
 
 But keep in mind you should never use bounded wildcard types as return types.
 This force the client to use wildcard types too.
 
-- Use Comparable<? super T> in preference to Comparable<T>.
-- Use Comparator<? super T> in preference to Comparator<T>
+- Use Comparable<? super T> in preference to Comparable\<T>.
+- Use Comparator<? super T> in preference to Comparator\<T>
 
 eg:
 
@@ -1043,7 +1043,7 @@ its key.
 
 ### Item 34: Use enums instead of int constants
 
-Why to avoid int constants?
+**Why to avoid int constants?**
 1) Their is no type safety, the compiler won’t complain if you pass an apple to a method that
 expects an orange
 2) There is no easy way to translate int enum constants into printable strings. If
@@ -1190,7 +1190,7 @@ Map<Plant.LifeCycle, Set<Plant>> plantsByLifeCycle = new EnumMap<>(Plant.LifeCyc
 ```
 In the parenthesis you put the key class.
 
-You can also do mor complex nested maps:
+You can also do more complex nested maps:
 ```
 public enum Phase {
     SOLID, LIQUID, GAS;
@@ -1334,12 +1334,12 @@ the sole interface to which it is applicable, guaranteeing that all marked types
 also subtypes of the sole interface to which it is applicable. This cannot be done
 in a marker annotation.
 
-When should you use a marker annotation and when should you use a
-marker interface?
+**When should you use a marker annotation and when should you use a
+marker interface?**
 
 Clearly you must use an annotation if the marker applies to
 any program element other than a class or interface, because only classes and
-interfaces can be made to implement or extend an interface
+interfaces can be made to implement or extend an interface.
 
 If you want to define a type that does not have any new methods associated with it,
 a marker interface is the way to go. If you want to mark program elements other
