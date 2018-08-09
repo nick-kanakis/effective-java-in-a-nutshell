@@ -291,7 +291,7 @@ Hashing retrieval is a two-step process.
 If you override only equals and not the hashcode, 2 objects that are equal
 will be in different buckets since their hashcode is not equal.
 
-Also If a PhoneNumber object's equality is based on the number is passed as argument,
+Eg: If a PhoneNumber object's equality is based on the number is passed as argument,
 this will not work:
 ```
 Map<PhoneNumber, String> m = new HashMap<>();
@@ -349,7 +349,11 @@ It is best to add comment to specify the format of the the toString() method
 
 ### Item 13: Override clone judiciously
 
-Why not to use clonable:
+When a class implements ```Cloneable``` means that you can "safely" clone an object, but
+it lacks a clone method, and Object’s clone method is protected. This means that there might not
+be an accessible clone method to invoke in the first place.
+
+Why not to use cloneable:
 - A class that implements Cloneable is expected to provide a properly functioning public clone()
 method. Also all superclass must implement clone(). This is a fragile mechanism and this
 is the one (of many) reason it is best to avoid overriding clone.
@@ -787,8 +791,20 @@ otherwise be eligible for garbage collection.
 Eg: Entry inner class of Map. While each entry is associated with a map,
 the methods on an entry (getKey, getValue, and setValue) do not need access to the map.
 
-**Tip: ** As we said before make your inner class static at creation and remove static if you
+**Tip** As we said before make your inner class static at creation and remove static if you
 really need to as you develop further.
+
+**Static keyword**
+
+- *Static field:*  static variables go in a particular pool in JVM memory called Metaspace (or PemGen),
+this means that if a field is declared static, then exactly a single copy of that field is created
+and shared among all instances of that class. It doesn’t matter how many times we initialize a class;
+there will always be only one copy of static field belonging to it.
+The value of this static field will be shared across all object of either same of any different class.
+- *Static Methods:* static methods also belong to a class instead of the object, and so they can be used
+without creating objects of the class. Static methods cannot be overridden, and canot access non-static content
+- *Static Block:* A static block is used for initializing static variables.
+- *Static Class:* Discussed in section above.
 
 ### Item 25: Limit source files to a single top-level class
 
