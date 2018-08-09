@@ -1378,10 +1378,10 @@ Lambda expression is composed by 3 parts:
 
 You can use a lambda expression in the context of a functional interface.
 
-Functional Interface is a interfaces annotated with @FunctionInterface that has only one
+Functional Interface is a interface annotated with @FunctionInterface that has only one
 abstract method (it may have several default or static methods).
 
-*Example: behavior parameterization*: You may have multiple implementation of one interface you can create an anonymous class and implement the interface
+*Example (behavior parameterization)*: You may have multiple implementation of one interface you can create an anonymous class and implement the interface
 or you can create a lambda expression (faster and without boilerplate code). As long as the interface is a functional interface.
 
 **Type checking**
@@ -1400,8 +1400,9 @@ Omit the types of all lambda parameters unless their presence makes your program
 
 **Exceptions**
 
-Lambdas can throw checked exceptions but non of the default functional interfaces provided by the JDK support one,
-so you will need to create one
+Lambdas can throw checked exceptions but none of the default functional interfaces provided by the JDK support one,
+so you will need to create one.
+
 eg:
 
 ```
@@ -1738,12 +1739,10 @@ Returns the sum of a primitive stream
 *range, rangeClosed*
 
 Both methods take the starting value of the range as the first parameter and the
-end value of the range as the second parameter. But range is exclusive, whereas rangeClosed is
-inclusive.
-
+end value of the range as the second parameter, and return a stream of that size.
+But range is exclusive, whereas rangeClosed is inclusive.
 
 **Creating a Stream**
-
 
 You can use *Stream.of* to create a stream.
 
@@ -1784,7 +1783,7 @@ These two collectors take a Comparator as argument to compare the elements in th
 
 ```
 Comparator<Dish> dishCaloriesComparator = Comparator.comparingInt(Dish::getCalories);
-Optional<Dish> mostCalorieDish = menu.stream().collect(maxBy(dishCaloriesComparator)); //Optional in cas the menu is empty
+Optional<Dish> mostCalorieDish = menu.stream().collect(maxBy(dishCaloriesComparator)); //Returns Optional in case the menu is empty
 ```
 
 
