@@ -796,14 +796,12 @@ really need to as you develop further.
 
 **Static keyword**
 
-- *Static field:*  static variables go in a particular pool in JVM memory called Metaspace (or PemGen),
-this means that if a field is declared static, then exactly a single copy of that field is created
-and shared among all instances of that class. It doesn’t matter how many times we initialize a class;
-there will always be only one copy of static field belonging to it.
-The value of this static field will be shared across all object of either same of any different class.
+- *Static field:*  static variables go in a particular pool in JVM memory called Metaspace (or PemGen).
+When a variable is declared as static, then a single copy of variable is created and shared among all objects at class level.
+Static variables are, essentially, global variables. All instances of the class share the same static variable.
 - *Static Methods:* static methods also belong to a class instead of the object, and so they can be used
-without creating objects of the class. Static methods cannot be overridden, and canot access non-static content
-- *Static Block:* A static block is used for initializing static variables.
+without creating objects of the class. Static methods cannot be overridden, and cannot access non-static content
+- *Static Block:* A static block is used for initializing static variables. It gets executed exactly once, when the class is first loaded.
 - *Static Class:* Discussed in section above.
 
 ### Item 25: Limit source files to a single top-level class
