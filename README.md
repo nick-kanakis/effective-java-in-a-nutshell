@@ -841,8 +841,7 @@ There are two facts about Set<?>:
 - Since the question mark ? stands for any type. Set<?> is capable of holding any type of elements.
 - Because we don't know the type of ?, we can't put any element into Set<?>. (You can only retrieve from it)
 
-** What is the difference between the unbounded wildcard type Set<?> and the
-raw type Set?**
+**What is the difference between the unbounded wildcard type Set<?> and the raw type Set?**
 
 ArrayList with raw type is not type safe but ArrayList<?> with the unbounded wildcard is type safe.
 
@@ -1777,6 +1776,9 @@ Stream.generate(Math::random)
 
 **Collectors interface**
 
+Stream.collect() is one of the Java 8’s Stream API‘s terminal methods. It allows to perform mutable fold operations.
+All predefined implementations can be found in the Collectors class.
+
 *Collectors.maxBy, Collectors.minBy*
 
 These two collectors take a Comparator as argument to compare the elements in the stream.
@@ -2062,11 +2064,11 @@ public class SetList {
             set.add(i);
             list.add(i);}
 
-    for (int i = 0; i < 3; i++) {
-        set.remove(i);
-        list.remove(i);}
+        for (int i = 0; i < 3; i++) {
+            set.remove(i);
+            list.remove(i);}
 
-    System.out.println(set + " " + list);
+        System.out.println(set + " " + list);
 }}
 ```
 
@@ -2136,7 +2138,7 @@ There are special optional for primitive types: OptionalInt, OptionalLong, and O
 Generally, if you find yourself writing a method that can’t always return a
 value and you believe it is important that users of the method consider this
 possibility every time they call it, then you should probably return an optional.
-Finally, you should rarely use an optional in any other capacity than as a return value.
+Finally, you should rarely use an optional other than a return value.
 
 
 ### Item 56: Write doc comments for all exposed API elements
