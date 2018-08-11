@@ -2140,6 +2140,9 @@ value and you believe it is important that users of the method consider this
 possibility every time they call it, then you should probably return an optional.
 Finally, you should rarely use an optional other than a return value.
 
+**Tip: ** Another way is to provide helper methods to check if the element is available
+and then retrieve the element or do some other action instead, a great example is
+Iterators, hasNext() & next()
 
 ### Item 56: Write doc comments for all exposed API elements
 
@@ -2162,7 +2165,7 @@ eg:
 * time. In some implementations it may run in time proportional
 * to the element position.
 *
-*@param index index of element to return; must be                <-PARAMETER #1
+* @param index index of element to return; must be                <-PARAMETER #1
 * non-negative and less than the size of this list
 * @return the element at the specified position in this list     <- What it returns
 * @throws IndexOutOfBoundsException if the index is out of range <- Exception thrown
@@ -2369,7 +2372,8 @@ check if next element is available and it does not force it to handle a potentia
 
 ### Item 70: Use checked exceptions for recoverable conditions and runtime exceptions for programming errors
 
-Java provides three kinds of throwables: **checked exceptions**, **runtime exceptions**,
+Java provides three kinds of throwables: **checked exceptions** are the exceptions that are checked at compile time.,
+**runtime exceptions** are the exceptions that are not checked at compiled time,
 and **errors**
 
 - Generally use **checked exceptions** for conditions from which the caller
@@ -2396,7 +2400,7 @@ to recover (for checked exceptions)
 
 ### Item 71: Avoid unnecessary use of checked exceptions
 
-Remember: A method that throws checked exceptions cannot be used in streams!
+**SOS:** A method that throws checked exceptions cannot be used in streams!
 
 When used sparingly, checked exceptions can increase the
 reliability of programs; when overused, they make APIs painful to use. If callers
