@@ -205,7 +205,7 @@ the object in a corrupted state (this is not the case with cleaners)
 Cleaners are a bit better than finalizers in this regard because
 class authors have control over their own cleaner threads
 
-What to do instead?
+**What to do instead?**
 Implement AutoCloseable and require the client to invoke the close method,
 typically using try-with-resources.
 
@@ -227,7 +227,7 @@ try (InputStream in = new FileInputStream(src); OutputStream out = new FileOutpu
 Advantages:
 1) Try-finally is more verbose
 2) Try-finally can easily written wrong (eg: forget the finally block)
-3) If an error is thrown by the try block and the finally block only the
+3) If an error is thrown by the try block and finally block, only the
 exception in the finally block will be written.
 
 ## Chapter 3: Methods common to all objects
@@ -251,7 +251,7 @@ Eg: a value class like Integer and String.
 4) **Consistent**: The result of an equals method should always be the same if the objects is not modified.
 5) **Non-nullity**: x.equals(null) should return false.
 
-**TIP 1**: There is no way to extend an instantiable class and add a value component while preserving the
+**SOS:** There is no way to extend an instantiable class and add a value component while preserving the
 equals contract
 
 How to correctly overridden equal method:
@@ -276,7 +276,7 @@ public boolean equals(Object o) {
 }
 ```
 
-**TIP 2**: float & doubles should be checked with Float.compare(float, float)
+**SOS**: float & doubles should be checked with Float.compare(float, float)
 and Double.compare(double, double) because of Float.NaN, Double.NaN.
 
 ### Item 11: Always override hashCode when you override equals
@@ -414,7 +414,7 @@ public interface Comparable<T> {
 Like overriding equals there is no way to extend an instantiable class with a new value
 component while preserving the compareTo contract.
 
-Do not use ```<``` or ```>``` operator instead use boxed compare methods:
+**SOS:** Do not use ```<``` or ```>``` operator instead use boxed compare methods:
 ```
 Double.compare(Double, Double)
 Float.compare(Float, Float)
@@ -448,6 +448,8 @@ The rule of thumb is simple: make each class or member as inaccessible as
 possible.
 
 **For classes**:
+You have 2+1 options: public, default, or private for inner classes only.
+
 If you declare a top-level class or interface with the public modifier, it will be public;
 otherwise, it will be package-private.
 
@@ -538,7 +540,7 @@ This is something to take into consideration, if the object is small make it imm
 if it is large try to make it as immutable as possible ( by making fields final etc...).
 Also you can internally use a package-private mutable companion class that it uses to speed up expensive computations
 
-**Tip: ** When creating a new class start by making everything immutable (and inaccessible) change only the things that you need to make them
+**SOS:** When creating a new class start by making everything immutable (and inaccessible) change only the things that you need to make them
 mutable (& accessible)
 
 ### Item 18: Favor composition over inheritance
@@ -773,9 +775,9 @@ How to transform tagged classes to hierarchy:
    Also include in each subclass the appropriate implementation of each abstract method
    in the root class.
 
-### Item 24: Favor static member classes over nonstatic
+### Item 24: Favor static member classes over non-static
 
-Differences between static and non static nested classes:
+**Differences between static and non static nested classes:**
 
 A non-static nested class has full access to the members of the class within which it is nested.
 A static nested class does not have a reference to a nesting instance,
@@ -791,7 +793,7 @@ otherwise be eligible for garbage collection.
 Eg: Entry inner class of Map. While each entry is associated with a map,
 the methods on an entry (getKey, getValue, and setValue) do not need access to the map.
 
-**Tip** As we said before make your inner class static at creation and remove static if you
+**SOS** As we said before make your inner class static at creation and remove static if you
 really need to as you develop further.
 
 **Static keyword**
@@ -891,7 +893,7 @@ Eliminate every unchecked warning that you can.
 
 If you can’t eliminate a warning, but you can prove that the code that
 provoked the warning is typesafe, then (and only then) suppress the
-warning with an @SuppressWarnings("unchecked") annotation. And always use the
+warning with an *@SuppressWarnings("unchecked")* annotation. And always use the
 SuppressWarnings annotation on the smallest scope possible. Do not forget to
 comment asying why it is safe to do so.
 
@@ -964,12 +966,12 @@ For this we can use bounded wildcards. Eg:
 Iterable<? extends E>
 ```
 
-This means that Iterable can be any time that is subtype of E, or E itshelf.
+This means that Iterable can be any time that is subtype of E, or E itself.
 
 For maximum flexibility, use wildcard types on input parameters that represent producers or consumers.
 
 **PECS stands for producer-extends, consumer-super.**
-- if a parameterized type represents a T producer, use **<? extends T>**
+- if a parametrized type represents a T producer, use **<? extends T>**
 - if it represents a T consumer, use **<? super T>**.
 
 But keep in mind you should never use bounded wildcard types as return types.
@@ -998,7 +1000,7 @@ When it is safe to use generic with arrays?
 2) If the method doesn’t allow a reference to the array to escape.
 
 
-If the method is 100% safe you can use the SafeVarargs (@SafeVarargs) annotation that constitutes
+If the method is 100% safe you can use the *SafeVarargs (@SafeVarargs)* annotation that constitutes
 a promise by the author of a method that it is typesafe
 
 As an alternative you can use a list of lists as arguments :
@@ -1149,7 +1151,6 @@ Operation op = Operation.valueOf("PLUS");
 
 All enums have an ordinal method, which returns the numerical position of each enum
 constant in its type.
-
 
 ```
 public enum Ensemble {
@@ -1340,7 +1341,7 @@ merely designates (or “marks”) a class that implements the interface as havi
 some property. For example, consider the Serializable interface.
 
 Marker interfaces define a type that is implemented by instances of the marked class; marker
-annotations do not
+annotations do not.
 
 If you define it as a marker interface, you can have it extend
 the sole interface to which it is applicable, guaranteeing that all marked types are
@@ -1367,7 +1368,7 @@ choice.
 Lambda expression is composed by 3 parts:
 
 - The list of parameters ```(Type1 t1, Type2 t2)```
-- An arrow ```->``` it separates teh patameters from the body
+- An arrow ```->``` it separates the patameters from the body
 - The Lambda body ```t1.getX().compareTo(t2.getX())```
 
  ```(Type1 t1, Type2 t2) -> t1.getX().compareTo(t2.getX())```
@@ -1380,8 +1381,9 @@ You can use a lambda expression in the context of a functional interface.
 Functional Interface is a interface annotated with @FunctionInterface that has only one
 abstract method (it may have several default or static methods).
 
-*Example (behavior parameterization)*: You may have multiple implementation of one interface you can create an anonymous class and implement the interface
-or you can create a lambda expression (faster and without boilerplate code). As long as the interface is a functional interface.
+*Example (behavior parameterization)*: You may have multiple implementation of one interface you can create an anonymous class
+and implement the interface or you can create a lambda expression (faster and without boilerplate code).
+As long as the interface is a functional interface.
 
 **Type checking**
 
@@ -1395,7 +1397,7 @@ Callable<Integer> c = () -> 42;
 PrivilegedAction<Integer> p = () -> 42;
 ```
 
-Omit the types of all lambda parameters unless their presence makes your program clearer
+Omit the types of all lambda parameters unless their presence makes your program clearer.
 
 **Exceptions**
 
@@ -1451,7 +1453,6 @@ Function<Integer, Integer> r2 = f.andThe(g); // if x = 1, r2 = 4, g(f(1))
 
 ```
 
-
 Lambdas should be one line long or self-explanatory, if this is not true use a classic class to
 make the code cleaner to read and maintain.
 
@@ -1484,7 +1485,6 @@ public interface TriFunction<T, U, V, R>{
 
 TriFunction<Integer, Integer, Integer, Color> colorFactory = Color::new;
 ```
-
 
 ### Item 44: Favor the use of standard functional interfaces
 
@@ -1959,7 +1959,7 @@ Period p = new Period(start, end);
 end.setYear(78); // Modifies internals of p!
 ```
 
-HOW????
+**HOW????**
 
 Date is mutable and can be changed after it has been passed to the Period instance.
 
@@ -2096,9 +2096,9 @@ For Collections it is preferable to return empty collection instead of null
 you can use these for convenience:
 
 ```
-Collections.emptyList
-Collections.emptySet
-Collections.emptyMap
+Collections.emptyList()
+Collections.emptySet()
+Collections.emptyMap()
 ```
 
 The same advise should be used and when return an array.
@@ -2140,7 +2140,7 @@ value and you believe it is important that users of the method consider this
 possibility every time they call it, then you should probably return an optional.
 Finally, you should rarely use an optional other than a return value.
 
-**Tip: ** Another way is to provide helper methods to check if the element is available
+**SOS:** Another way is to provide helper methods to check if the element is available
 and then retrieve the element or do some other action instead, a great example is
 Iterators, hasNext() & next()
 
@@ -2209,7 +2209,7 @@ public enum OrchestraSection {
 ### Item 57: Minimize the scope of local variables
 
 The most powerful technique for minimizing the scope of a local variable
-is to declare it where it is first used.
+is to declare it where it is first used. Do not define everything in the top.
 
 You can declare multiple variables with for statement:
 
@@ -2237,7 +2237,6 @@ Keep up to date with new libraries of Java, don’t reinvent the wheel.
 The float and double types are particularly ill-suited for monetary calculations,
 because it is impossible to represent 0.1 (or any other negative power of ten)
 as a float or double exactly.
-
 
 eg:
 
@@ -2267,7 +2266,7 @@ There are 2 major differences between primitives and boxed primitives.
   have the same value and different identities. This means that applying the == operator
   to boxed primitives will almost always fail.
 
-2) Primitives are more time- and space efficient than boxed primitives.
+2) Primitives are more time and space efficient than boxed primitives.
 
 
 When your program does mixed-type computations
