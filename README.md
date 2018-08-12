@@ -2648,7 +2648,8 @@ private FieldType getField() {
             if (field == null) // Second check (with locking)
                 field = result = computeFieldValue();
             }
-   }return result;
+   }
+   return result;
 }
 ```
 
@@ -2714,10 +2715,20 @@ version UID in every serializable class you write.
 private static final long serialVersionUID = randomLongValue;
 ```
 
-It doesn’t matter what value you choose for
-randomLongValue. You can generate the value by running the serialver
-utility on the class, but it’s also fine to pick a number out of thin air. It is not
-required that serial version UIDs be unique.
+serialVersionUID is used during deserialization to verify that the sender ( the person who serializes) and receiver ( the person who deserializes)
+of a serialized object have loaded classes for that object that are compatible with respect to serialization.
+In case a receiver has loaded a class for the object that has a different serialVersionUID than that used to serialize,
+then deserialization will end with InvalidClassException.
+
+If a serializable class does not explicitly declare a serialVersionUID, then the serialization runtime will calculate a default serialVersionUID
+value for that class based on various aspects of the class (name, methods, fields etc.).
+However, it is strongly recommended that all serializable classes explicitly declare serialVersionUID values,
+since the default serialVersionUID computation is highly sensitive to class details that may vary depending on compiler implementations,
+and can thus result in unexpected InvalidClassExceptions during deserialization.
+
+It doesn’t matter what value you choose for randomLongValue. You can generate the value by running the *serialver*
+utility on the class, but it’s also fine to pick a number out of thin air. It is not required that serial version UIDs be unique.
+
 
 ### Item 88: Write readObject methods defensively
 
