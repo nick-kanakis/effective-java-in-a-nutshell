@@ -2394,7 +2394,7 @@ It a conventions that errors are reserved for use by the JVM to indicate resourc
 deficiencies, invariant failures, or other conditions that make it impossible to continue execution.
 Use only subclasses of RuntimeException for unchecked throwables and do not use Error.
 
-Do not forget that exceptions are classes and you shoul provide methods that help the caller
+Do not forget that exceptions are classes and you should provide methods that help the caller
 to recover (for checked exceptions)
 
 ### Item 71: Avoid unnecessary use of checked exceptions
@@ -2461,7 +2461,6 @@ declare that a public method throws Exception or, worse, throws Throwable.
 
 To capture a failure, the detail message of an exception should contain the
 values of all parameters and fields that contributed to the exception.
-
 
 ### Item 76: Strive for failure atomicity
 
@@ -2655,7 +2654,7 @@ private FieldType getField() {
 ### Item 84: Don’t depend on the thread scheduler
 
 Any program that relies on the thread scheduler for correctness or performance is likely to be
-nonportable.
+non-portable.
 
 As a corollary, do not rely on Thread.yield or thread priorities. These facilities
 are merely hints to the scheduler.
